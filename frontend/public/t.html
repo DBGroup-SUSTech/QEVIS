@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+</style>
+<body>
+
+<!-- load the d3.js library -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="lib/dagre.js"></script>
+<script>
+    // set the dimensions and margins of the graph
+    var margin = {top: 20, right: 20, bottom: 50, left: 120},
+        width = 27000 - margin.left - margin.right,
+        height = 9000 - margin.top - margin.bottom;
+
+    let visWidth = 900;
+    let nodeContainerHeight = 30;
+    let nodeBarHeight = nodeContainerHeight - 5;
+    let nodeContainerWidth = 300;
+    let maxNodeWith = nodeContainerWidth - 20;
+
+    let stepContainerHeight = 4;
+    let stepHeight = 3;
+
+    let iconContainerHeight = 20;
+    let iconSize = 15;
+
+    let infoContainerHeight = 30;
+    let infoHeight = 25;
+    let infoHeightGap = 20;
+
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    let rootContainer = svg
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    let summaryContainer = rootContainer.append('g').attr('class', 'summaryContainer')
+        .attr("transform", "translate(" + 100 + "," + 0 + ")");
+    let detailProgressContainer = rootContainer.append('g').attr('class', 'progressContainer');
+    let detailStructureContainer = rootContainer.append('g').attr('class', 'detailStructure');
+
+    let stepColorEncoding = {
+        "Initialization": "#a6cee3",
+        "Shuffle": "#1f78b4",
+        "Processor": "#b2df8a",
+        "Sink": "#e31a1c",
+        "Output": "#ff7f00",
+        "Spill": "#cab2d6",
+        "Input": "#984ea3"
+    };
+
+    //Draw the legned---------------------------------------------------------------------------------------------
+    let colorIcons = [], i = 0;
+    for (let key in stepColorEncoding) {
+        colorIcons.push({
+            'y': i * iconContainerHeight,
+            'step': key,
+            'color': stepColorEncoding[key]
+        });
+        i += 1;
+    }
+    let allIconContainer = svg.append('g').attr('class', 'iconContainer')
+        .attr('transform', icon => "translate(" + [30, margin.top] + ')')
+    let iconContainers = allIconContainer.selectAll('.iconContainer').data(colorIcons).enter().append('g')
+        .attr('class', 'iconContainer').attr('transform', icon => "translate(" + [0, icon.y] + ')')
+    iconContainers.append('rect').attr('width', iconSize).attr('height', iconSize)
+        .attr('fill', icon => stepColorEncoding[icon.step]);
+    iconContainers.append('text').text(d => d.step).attr("font-size", 15).attr('x', iconSize + 5).attr('y', 12)
+    //Draw the legned--------------------------------------------------------------------------------------Finished
+
+    d3.json('data/Example6/dag_with_time.json').then(solution => {
+        // Clear the existing html elements
+        let nodes = solution.vertexes;
+        let edges = solution.edges;
+        console.log('nodes', nodes)
+        nodes.forEach(node => {
+            if (node.vdat.vertex_name.startsWith('Map')) {
+                node.hv_type = 'Map'
+            } else if (node.vdat.vertex_name.startsWith('Reducer')) {
+                node.hv_type = 'Reducer'
+            } else {
+                node.hv_type = null
+            }
+        })
+
+        let sortNodesByGraph = function (nodes, edges) {
+            let idNode = {};
+            nodes.forEach(node => {
+                idNode[node.idx] = node;
+                node.children = [];
+                node.preNodes = [];
+                node.parent = null;
+                node.vertex_name = node.vdat.vertex_name;
+            })
+            edges.forEach(edge => {
+                let parentNode = idNode[edge.dst], childNode = idNode[edge.src];
+                edge.srcNode = childNode, edge.dstNode = parentNode;
+                parentNode.children.push(childNode), childNode.parent = parentNode, parentNode.preNodes.push(childNode)
+            })
+
+            let orderedNodes = [];
+            let procNode = function (node) {
+                if (node.children.length == 0) {
+                    orderedNodes.push(node)
+                    if (node.parent == null) return
+                    node.parent.children.shift();
+                    procNode(node.parent);
+                } else {
+                    procNode(node.children[0])
+                }
+            }
+            procNode(nodes[0])
+            return orderedNodes
+        }
+
+        let orderedNodes = sortNodesByGraph(nodes, edges)
+        nodes.forEach(node => {
+            console.log('nodes name', node.vertex_name)
+        })
+
+        // get the max time and min time
+        let maxTime = d3.max(nodes, node => d3.max(node.vdat.tasks, task => task.end_time));
+        let minTime = d3.min(nodes, node => d3.min(node.vdat.tasks, task => task.start_time));
+        // Calculate the xscale
+        let xScale = d3.scaleLinear().domain([minTime, maxTime]).range([0, visWidth]);
+        let offsetY = 0, offsetYGap = 10;
+        orderedNodes.forEach((node, i) => {
+            // Calculate the start time and end time of each node
+            node.startTime = d3.min(node.vdat.tasks, task => task.start_time);
+            node.endTime = d3.max(node.vdat.tasks, task => task.end_time);
+            node.layout = {
+                'x': xScale(node.startTime),
+                'width': xScale(node.endTime) - xScale(node.startTime),
+                'height': nodeContainerHeight
+            }
+            if (node.preNodes.length == 0) {
+                node.layout.y = offsetY;
+                offsetY += (nodeContainerHeight + offsetYGap);
+            } else {
+                node.layout.y = d3.sum(node.preNodes, node => node.layout.y) / node.preNodes.length
+            }
+            if (node.layout.x == undefined) {
+                node.layout.x = 0;
+                node.layout.width = 5;
+            }
+            let _tasks = node.vdat.tasks;
+            // Calculate the timespan of a node by max end time minus min start time from all tasks
+            node.steps = [];
+            if (_tasks.length > 0) {
+                for (let i = 0, ilen = _tasks[0].steps.length; i < ilen; i++) {
+                    //Assume the order of the task.steps in a node have the same order
+                    node.steps.push({
+                        'name': _tasks[0].steps[i].name,
+                        'value': d3.sum(_tasks, task => task.steps[i].value)
+                    })
+                }
+            }
+            let sumStepValue = d3.sum(node.steps, step => step.value);
+            let offsetX = 0;
+            node.steps.forEach(step => {
+                let stepWidth = step.value / sumStepValue * node.layout.width;
+                step.width = stepWidth, step.x = offsetX;
+                offsetX += stepWidth;
+            })
+        })
+
+        orderedNodes.forEach(node => {
+            // deal with special node
+            if (node.hv_type == null) {
+                if (node.preNodes.length == 0) {
+                    node.layout.x = 0;
+                } else {
+                    node.layout.x = d3.max(node.preNodes, node => (node.layout.x + node.layout.width + 10))
+                }
+            }
+        })
+
+        // Deal with the overlapping
+        orderedNodes.sort((a, b) => a.layout.y - b.layout.y);
+        let isOverLap = function (a, b) {
+            // detect overlap of two rectangles
+            let minAX = a.layout.x, minAY = a.layout.y, minBX = b.layout.x, minBY = b.layout.y;
+            let maxAX = minAX + a.layout.width, maxAY = minAY + a.layout.height,
+                maxBX = minBX + b.layout.width, maxBY = minBY + b.layout.height
+            let aLeftOfB = maxAX < minBX;
+            let aRightOfB = minAX > maxBX;
+            let aAboveB = minAY > maxBY;
+            let aBelowB = maxAY < minBY;
+            return !(aLeftOfB || aRightOfB || aAboveB || aBelowB);
+        }
+        let detectOverlapCF = function (nodes) {
+            for (let i = 0, ilen = nodes.length; i < ilen; i++) {
+                let node = nodes[i];
+                if (node.parent == null) continue
+                if (isOverLap(node, node.parent) == true) {
+                    return node.parent.layout.y >= node.layout.y ? [node.parent, node] : [node, node.parent]
+                }
+            }
+            return false
+        }
+
+        let detectOverlapOP = function (nodes) {
+            for (let i = 0, ilen = nodes.length; i < ilen; i++) {
+                for (let j = i + 1, jlen = nodes.length; j < jlen; j++) {
+                    if (isOverLap(nodes[i], nodes[j]) == true) {
+                        return nodes[i].layout.y >= nodes[j].layout.y ? [nodes[i], nodes[j]] : [nodes[j], nodes[i]]
+                    }
+                }
+            }
+            return false
+        }
+
+        let index = 0;
+        while (true) {
+            if (index > 100) {
+                console.log('out of 100 and return')
+                break
+            }
+            let overlaps = detectOverlapCF(orderedNodes);
+            if (overlaps == false) {
+                break
+            } else {
+                let sign = false
+                orderedNodes.sort((a, b) => a.layout.y - b.layout.y);
+                for (let i = 0, ilen = orderedNodes.length; i < ilen; i++) {
+                    let moveDown = 0;
+                    if (overlaps[0] == orderedNodes[i]) {
+                        sign = true;
+                        moveDown = overlaps[0].layout.y - overlaps[1].layout.y
+                    }
+                    if (sign == true) {
+                        orderedNodes[i].layout.y += (moveDown + offsetYGap)
+                    }
+                }
+            }
+            index += 1;
+        }
+
+        index = 0;
+        while (true) {
+            if (index > 100) {
+                console.log('out of 100 and return')
+                break
+            }
+            let overlaps = detectOverlapOP(orderedNodes);
+            if (overlaps == false) {
+                break
+            } else {
+                let sign = false
+                orderedNodes.sort((a, b) => a.layout.y - b.layout.y);
+                for (let i = 0, ilen = orderedNodes.length; i < ilen; i++) {
+                    let moveDown = 0;
+                    if (overlaps[0] == orderedNodes[i]) {
+                        sign = true;
+                        moveDown = overlaps[0].layout.y - overlaps[1].layout.y
+                    }
+                    if (sign == true) {
+                        orderedNodes[i].layout.y += (moveDown + offsetYGap)
+                    }
+                }
+            }
+            index += 1;
+        }
+        // Process - steps-----------------------------------------------------------------------
+        // Rendering
+        let nodeColor = {
+            'Map': 'red', 'Reducer': 'green', 'Other': 'grey'
+        };
+
+
+        detailProgressContainer.selectAll('*').remove();
+        detailStructureContainer.selectAll('*').remove();
+
+        let allNodeContainer = summaryContainer.append('g').attr('class', 'allNodeContainer');
+        let nodeContainers = allNodeContainer.selectAll('.nodeContainer').data(nodes).enter()
+            .append('g').attr('class', 'nodeContainer')
+            .attr('transform', node => 'translate(' + [0, node.layout.y] + ')');
+
+        nodeContainers.each(function (node) {
+            // Align the
+            let _container = d3.select(this);
+            _container.append('rect').attr('fill', 'grey').attr('fill-opacity', 0.5)
+                .attr('stroke', nodeColor[node.hv_type]).attr('x', node => node.layout.x - 1)
+                .attr('width', node => node.layout.width + 2).attr('height', node => node.layout.height);
+
+            let steps = _container.append('g').attr('class', 'allStepContainer')
+                .attr('transform', 'translate(' + [node.layout.x, (nodeContainerHeight - nodeBarHeight) / 2] + ')')
+                .selectAll('.stepContainer')
+                .data(node.steps).enter().append('g').attr('class', 'stepContainer')
+                .attr('transform', (d, i) => "translate(" + [d.x, 0] + ")")
+                .append('rect').attr('width', step => step.width).attr('height', nodeBarHeight)
+                .attr('fill', d => stepColorEncoding[d.name]).attr('stroke', 'none').attr('stroke-width', 0.1)
+            steps.append('title').text(step => node.vdat.vertex_name + "; Step: " + step.name);
+            _container.append('title').text(d => d.vdat.vertex_name);
+            _container.append('text').text(d => d.vdat.vertex_name).attr('x', node.layout.x)
+        });
+        nodeContainers.on('click', node => {
+            drawDetailStructure(node);
+            drawDetails(node);
+        })
+        let rectangle = {};
+        rectangle.maxX = d3.max(nodes, node => node.layout.x + node.layout.width);
+        rectangle.maxY = d3.max(nodes, node => node.layout.y + node.layout.height);
+        console.log('boundary', rectangle)
+        summaryContainer.append('rect').attr('width', rectangle.maxX + 2).attr('height', rectangle.maxY + 2)
+            .attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 1)
+            .attr('x', -1).attr('y', -1)
+
+        // Visualize the edges------------------------------------------------------------------------------------------
+        let lineContainers = summaryContainer.selectAll('.linkContainer')
+            .data(edges).enter().append('g').attr('class', 'linkContainer');
+
+        var Gen = d3.line().x((p) => p.x).y((p) => p.y).curve(d3.curveBasis);
+        lineContainers.each(function (d) {
+            let _container = d3.select(this);
+            let srcX = d.srcNode.layout.x + d.srcNode.layout.width, srcY = d.srcNode.layout.y + nodeContainerHeight / 2,
+                dstX = d.dstNode.layout.x, dstY = d.dstNode.layout.y + nodeContainerHeight / 2;
+            let dx = srcX - dstX;
+            let points = [{x: srcX, y: srcY},
+                {x: srcX - dx * 2 / 4, y: srcY},
+                {x: dstX + dx * 2 / 4, y: dstY},
+                {x: dstX, y: dstY}];
+            _container.append('path').attr("d", Gen(points)).attr('fill', 'none')
+                .attr('stroke', 'grey').attr('stroke-width', 2).attr('stroke-dasharray', "3,3")
+        });
+        // Visualize the edges---------------------------------------------------------------------------------------End
+
+        let drawDetailStructure = function (node) {
+            let attrWidth = 200, attrUnitHeight = 20;
+            let steps = node.vdat.step_list;
+            let nodeWidth = 120, nodeHeight = 30, nodeConnections = [];
+            let currentSumAttrHeight = 0;
+            for (let i = 0, ilen = steps.length; i < ilen; i++) {
+                steps[i].x = 0, steps[i].y = i * (infoContainerHeight + infoHeightGap);
+                let keys = Object.keys(steps[i].attr_dict);
+                let currentHeight = keys.length * attrUnitHeight;
+                steps[i].attrX = 300;
+                steps[i].width = nodeWidth;
+                steps[i].height = nodeHeight;
+                steps[i].attrY = currentSumAttrHeight;
+                steps[i].attrHeight = currentHeight;
+                steps[i].attrWidth = attrWidth;
+                currentSumAttrHeight += (currentHeight + infoHeightGap);
+                if (i == 0) continue;
+                nodeConnections.push({'src': steps[i - 1], 'dst': steps[i]})
+            }
+
+            detailStructureContainer.attr('transform', 'translate(' + [rectangle.maxX + 200, rectangle.maxY + 10] + ')')
+                .append('circle').attr('r', 2).attr('stroke-width', 1).attr('fill', 'black')
+                .attr('cy', 0).attr('fill', 'white').attr('stroke', 'black');
+            detailStructureContainer.selectAll('*').remove();
+            detailStructureContainer.selectAll('.detailLine').data(nodeConnections).enter().append('line').attr('class', 'detailLine')
+                .attr('x1', d => d.src.x + nodeWidth / 2).attr('y1', d => d.src.y + nodeHeight)
+                .attr('x2', d => d.dst.x + nodeWidth / 2).attr('y2', d => d.dst.y)
+                .attr('stroke', 'grey').attr('stroke-width', 2);
+
+            //Draw details
+            let rectContainers = detailStructureContainer.selectAll('.detailNode')
+                .data(steps).enter().append('g').attr('class', 'detailNode').attr('transform', (d, i) => 'translate(' + [0, d.y] + ')');
+
+            rectContainers.append('rect')
+                .attr("width", nodeWidth).attr('height', nodeHeight).attr('stroke-width', 1).attr('stroke', 'grey')
+                .attr('fill', 'none');
+
+            let titles = rectContainers.append('text').text(d => d.step_name).style('font-size', 10).attr('fill', 'black');
+            titles.each(function (d) {
+                let title = d3.select(this);
+                let boundaryRect = title.node().getBoundingClientRect();
+                title.attr('dx', (nodeWidth - boundaryRect.width) / 2).attr('dy', boundaryRect.height / 2 + nodeHeight / 2 - 2);
+            });
+
+            // Draw attributes
+            let attrContainers = detailStructureContainer.selectAll('.attrNode')
+                .data(steps).enter().append('g').attr('class', 'attrNode').attr('transform', (d, i) => 'translate(' + [d.attrX, d.attrY] + ')');
+
+            attrContainers.each(function (d) {
+                let _container = d3.select(this);
+                let strList = [];
+                for (let key in d.attr_dict) {
+                    strList.push(key + ": " + d.attr_dict[key]);
+                }
+                let boundaryRect = _container.append('rect')
+                    .attr("width", d => d.attrWidth).attr('height', d => d.attrHeight).attr('stroke-width', 1)
+                    .attr('stroke', 'grey').attr('fill', 'none').attr('fill-opacity', 0.6);
+                let titleContainers = _container.selectAll('.title')
+                    .data(strList).enter().append('g')
+                    .attr('transform', (d, i) => 'translate(' + [0, (i + 0.5) * attrUnitHeight] + ')');
+                let maxCellWidth = 0;
+                titleContainers.each(function (d) {
+                    let _container = d3.select(this);
+                    let title = _container.append('text').attr('class', 'title').text(d).attr('font-size', 5);
+                    let boundaryRect = title.node().getBoundingClientRect();
+                    maxCellWidth = Math.max(boundaryRect.width, maxCellWidth);
+                });
+                d.attrWidth = maxCellWidth;
+                boundaryRect.attr('width', d => d.attrWidth);
+                _container.attr('transform', d => 'translate(' + [d.attrX, d.attrY] + ')')
+            });
+
+            let nodeAttrLineContainer = detailStructureContainer.selectAll('.nodeAttrLine')
+                .data(steps).enter().append('g').attr('class', 'nodeAttrLine')
+
+            nodeAttrLineContainer.each(function (d) {
+                let _container = d3.select(this);
+                let srcX = d.x + d.width, srcY = d.y + d.height / 2, dstX = d.attrX, dstY = d.attrY + d.attrHeight / 2;
+                let dx = srcX - dstX;
+                let points = [{x: srcX, y: srcY},
+                    // {x: srcX - dx * 1/ 4, y: srcY},
+                    // {x: dstX + dx * 1/ 4, y: dstY},
+                    {x: dstX, y: dstY}];
+                let Gen = d3.line()
+                    .x((p) => p.x).y((p) => p.y).curve(d3.curveBasis);
+                _container.append('path').attr('stroke-width', 1).attr('d', Gen(points)).attr('stroke', 'grey').attr('fill', 'none')
+            })
+        };
+        let drawDetails = function (node) {
+            let keyNode = node;
+            let tasks = node.vdat.tasks;
+            tasks.sort((a, b) => a.start_time - b.start_time)
+            tasks.forEach((task, i) => {
+                task.y = i * stepContainerHeight, task.x = xScale(task.start_time);
+                task.width = xScale(task.end_time) - xScale(task.start_time);
+                let sumValue = d3.sum(task.steps, step => step.value)
+                let offsetX = 0;
+                task.steps.forEach(step => {
+                    step.x = offsetX;
+                    step.width = step.value / sumValue * task.width;
+                    offsetX += step.width
+                })
+            });
+            detailProgressContainer.selectAll('*').remove();
+            detailProgressContainer.attr('transform', 'translate(' + [100, rectangle.maxY + 10] + ')')
+                .append('circle').attr('r', 2).attr('stroke-width', 1).attr('fill', 'black')
+                .attr('cy', 0).attr('fill', 'white').attr('stroke', 'black');
+
+            let progressContainer = detailProgressContainer.append('g').attr('class', 'progressContainer')
+                .attr('transform', 'translate(' + [0, 0] + ')');
+            progressContainer.append('circle').attr('r', 2).attr('stroke-width', 1).attr('fill', 'black')
+                .attr('stroke', 'black')
+
+            let taskContainer = progressContainer.selectAll('taskContainer').data(tasks).enter()
+                .append('g').attr('class', 'taskContainer').attr('transform', task => 'translate(' + [0, task.y] + ')');
+
+            taskContainer.each(function (task) {
+                let _container = d3.select(this);
+                _container.append('rect').attr('width', node.maxWidth).attr('height', stepContainerHeight)
+                    .attr('fill', 'none').attr('stroke', 'black').attr('stroke-width', 0.1)
+                    .attr('x', xScale(node.startTime))
+                let allStepContaienr = _container.append('g')
+                    .attr('transform', task => 'translate(' + [task.x, (stepContainerHeight - stepHeight) / 2] + ')');
+                // allStepContaienr.append('rect').attr('width', task.width).attr('height', stepHeight)
+                //     .attr('fill', 'none').attr('stroke', 'black').attr('stroke-width', 1)
+                let stepContainers = allStepContaienr.selectAll('.stepContainer').data(task.steps).enter()
+                    .append('g').attr('transform', step => 'translate(' + [step.x, 0] + ')')
+                stepContainers.append('rect').attr('fill', step => stepColorEncoding[step.name])
+                    .attr('width', step => step.width)
+                    .attr('height', stepHeight)
+            });
+            console.log('tasks', tasks)
+        };
+    });
+</script>
+</body>

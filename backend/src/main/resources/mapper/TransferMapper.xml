@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dbgroup.qevis.mapper.TransferMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.dbgroup.qevis.entity.Transfer">
+        <id column="tran_id" property="tranId" />
+        <result column="aid" property="aid" />
+        <result column="src" property="src" />
+        <result column="src_v" property="srcV" />
+        <result column="dst" property="dst" />
+        <result column="type" property="type" />
+        <result column="csize" property="csize" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="rate" property="rate" />
+        <result column="delay" property="delay" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        tran_id, aid, src, src_v, dst, type, csize, start_time, end_time, rate, delay
+    </sql>
+
+</mapper>

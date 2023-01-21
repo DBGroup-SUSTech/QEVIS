@@ -1,0 +1,12 @@
+/sys/block/dm-0/queue/rotational:1
+/sys/block/loop0/queue/rotational:1
+/sys/block/loop1/queue/rotational:1
+/sys/block/loop2/queue/rotational:1
+/sys/block/loop3/queue/rotational:1
+/sys/block/loop4/queue/rotational:1
+/sys/block/loop5/queue/rotational:1
+/sys/block/loop6/queue/rotational:1
+/sys/block/loop7/queue/rotational:1
+/sys/block/sda/queue/rotational:1
+/sys/block/sdb/queue/rotational:1
+/sys/block/sr0/queue/rotational:1

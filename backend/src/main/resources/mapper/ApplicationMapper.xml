@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dbgroup.qevis.mapper.ApplicationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.dbgroup.qevis.entity.Application">
+        <id column="aid" property="aid" />
+        <result column="app_id" property="appId" />
+        <result column="database_name" property="databaseName" />
+        <result column="query_name" property="queryName" />
+        <result column="query_string" property="queryString" />
+        <result column="query_plan" property="queryPlan" />
+        <result column="query_dag" property="queryDag" />
+        <result column="create_time" property="createTime" />
+        <result column="status" property="status" />
+        <result column="duration" property="duration" />
+        <result column="machine_no" property="machineNo" />
+        <result column="map_no" property="mapNo" />
+        <result column="reducer_no" property="reducerNo" />
+        <result column="task_no" property="taskNo" />
+        <result column="reference_time" property="referenceTime" />
+        <result column="task_id_prefix" property="taskIdPrefix" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        aid, app_id, database_name, query_name, query_string, query_plan, query_dag, create_time, status, duration, machine_no, map_no, reducer_no, task_no, reference_time, task_id_prefix
+    </sql>
+
+</mapper>

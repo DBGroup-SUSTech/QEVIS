@@ -1,0 +1,13 @@
+POST http://127.0.0.1:5000/api/record/
+Content-Type: application/json
+
+{
+  "content": "2020-11-25 10:58:18,736 [INFO] [TezChild] |runtime.LogicalIOProcessorRuntimeTask|: Fang: Tez 'Input' on Map stage starting at time 8966971827064316 ns\n",
+  "vec_name": " Map 6",
+  "task_id": "attempt_1606268438083_0028_1_01_000006_0",
+  "next_interval": 0.307
+}
+
+###
+
+

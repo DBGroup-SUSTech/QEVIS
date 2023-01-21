@@ -1,0 +1,16 @@
+GET http://127.0.0.1:5000/api/dag/
+###
+
+
+GET http://127.0.0.1:5000/api/simulation/local/
+
+
+###
+GET http://127.0.0.1:5000/api/incr/
+
+
+###
+GET http://127.0.0.1:5000/api/simulation/stop/
+
+
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dbgroup.qevis.mapper.CounterMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.dbgroup.qevis.entity.Counter">
+        <id column="cid" property="cid" />
+        <result column="aid" property="aid" />
+        <result column="tid" property="tid" />
+        <result column="file_bytes_read" property="fileBytesRead" />
+        <result column="file_bytes_written" property="fileBytesWritten" />
+        <result column="hdfs_bytes_read" property="hdfsBytesRead" />
+        <result column="input_records_processed" property="inputRecordsProcessed" />
+        <result column="output_records" property="outputRecords" />
+        <result column="input_split_length_bytes" property="inputSplitLengthBytes" />
+        <result column="output_bytes" property="outputBytes" />
+        <result column="shuffle_bytes" property="shuffleBytes" />
+        <result column="shuffle_bytes_to_mem" property="shuffleBytesToMem" />
+        <result column="shuffle_bytes_to_disk" property="shuffleBytesToDisk" />
+        <result column="shuffle_bytes_disk_direct" property="shuffleBytesDiskDirect" />
+        <result column="full_content" property="fullContent" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        cid, aid, tid, file_bytes_read, file_bytes_written, hdfs_bytes_read, input_records_processed, output_records, input_split_length_bytes, output_bytes, shuffle_bytes, shuffle_bytes_to_mem, shuffle_bytes_to_disk, shuffle_bytes_disk_direct, full_content
+    </sql>
+
+    <select id="selectAllByTaskTime" resultType="java.util.Map">
+        select c.tid, output_bytes as ob
+        from counter as c
+                 join task t on c.tid = t.tid
+        where c.aid = #{aid}
+          and t.aid = #{aid}
+          and t.start_time between #{start} and #{end};
+    </select>
+
+</mapper>

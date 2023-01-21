@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.generate.mapper.RecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.dbgroup.qevis.entity.Record">
+        <id column="rid" property="rid" />
+        <result column="aid" property="aid" />
+        <result column="timestamp" property="timestamp" />
+        <result column="machine" property="machine" />
+        <result column="content" property="content" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        rid, aid, timestamp, machine, content
+    </sql>
+
+</mapper>
