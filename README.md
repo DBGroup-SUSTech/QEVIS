@@ -2,7 +2,7 @@
 
 QEVIS is a visual analytics system, which supports the visual exploration of query execution at multiple levels of granularity in Apache Hive.
 
-This repository contains the source code for QEVIS, which includes a frontend, a frontend and code for processing log data of Hive.
+This repository contains the source code for QEVIS, which includes a frontend, a backend and code for processing log data of Hive.
 
 ## Repository Structure
 - backend: a backend server for visual analysis system using Java
