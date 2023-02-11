@@ -21,9 +21,9 @@ To run this demo system with provided data, you need:
 ### Step 1: Prepare data
 Due to the size limit, in this repository we only provide 5 representative sample data from the real employment environment.
 
-Data is zipped and locates at `/data.zip`. Unzip it and a new folder `data` will be created at the project root.
+Data is zipped and locates at `/data`. Unzip these 5 files you will get 5 folders.
 
-In this folder, there are 5 folders and each folder contains:
+Each folder contains:
 - A log file collected from Hive application execution
 - An input SQL text
 - A physical execution plan for input SQL
