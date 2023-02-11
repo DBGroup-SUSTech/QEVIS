@@ -283,7 +283,6 @@ pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,python,venv
 
-data
 !.gitignore
 .idea
 data_local
