@@ -99,6 +99,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         for (File f : files) {
             System.out.print("Load application " + f.getName());
             boolean success = loadApplication(f.getName());
@@ -114,6 +115,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         for (File f : files) {
             System.out.print("Load vertex " + f.getName());
             boolean success = loadVertex(f.getName());
@@ -129,6 +131,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         for (File f : files) {
             System.out.print("Load task " + f.getName());
             boolean success = loadTask(f.getName());
@@ -144,6 +147,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         for (File f : files) {
             System.out.print("Load counter " + f.getName());
             boolean success = loadCounter(f.getName());
@@ -159,6 +163,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         for (File f : files) {
             System.out.print("Load transfer " + f.getName());
             boolean success = loadTransfer(f.getName());
@@ -174,6 +179,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         for (File f : files) {
             System.out.print("Load record " + f.getName());
             boolean success = loadRecord(f.getName());
@@ -189,6 +195,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
 //        boolean success = loadEvent(files[0].getName());
         for (File f : files) {
             System.out.print("Load event " + f.getName());
@@ -205,6 +212,7 @@ public class Loader {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
 //        boolean success = loadDiagnose(files[0].getName());
         for (File f : files) {
             System.out.print("Load diagnose " + f.getName());
