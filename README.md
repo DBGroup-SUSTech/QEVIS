@@ -10,7 +10,7 @@ This repository contains the source code of a demo system for QEVIS, which inclu
 - `data_process`: Python scripts to collect and clean data fetched from Hive
 - `frontend`: a web-based interface implemented by Vue.js
 
-## Employment
+## Deployment
 
 To run this demo system with provided data, you need:
 - Java 1.8 envornment with maven 
@@ -69,9 +69,9 @@ Notice that **Node.js 16** is required to run the frontend server.
 This demo system uses MySQL 5.7 for data storage. Enter your MySQL and execute these commands:
 ```sql
 -- Create database and user
-create database if not exists qevis_db3;
-create user 'qevis_user3'@'%' identified by 'qevis_pwd';
-grant all privileges on qevis_db3.* to 'qevis_user3'@'%';
+create database if not exists qevis_db;
+create user 'qevis_user'@'%' identified by 'qevis_pwd';
+grant all privileges on qevis_db.* to 'qevis_user3'@'%';
 flush privileges;
 -- Switch user and database, then create tables use DDL file
 soruce <project_root>/backend/database/qevis_ddl.sql;
