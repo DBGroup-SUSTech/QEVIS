@@ -21,7 +21,7 @@ To run this demo system with provided data, you need:
 ### Step 1: Prepare data
 Due to the size limit, in this repository we only provide 5 representative sample data from the real employment environment.
 
-Data is zipped and locates at `/data`. Unzip these 5 files you will get 5 folders.
+Data is zipped and locates at `<project_root>/data_process/data`. Unzip these 5 files you will get 5 folders. **After that, 5 `.zip` files should be removed from `data` folder.**
 
 Each folder contains:
 - A log file collected from Hive application execution
@@ -60,6 +60,7 @@ mvn clean package       # this commond will download maven packages from the int
 To setup the enviornment of frontend:
 ```shell
 cd <project_root>/frontend
+# Node.js 16 is required
 npm install         # this commond will download npm packages from the internet
 ```
 Notice that **Node.js 16** is required to run the frontend server.
@@ -68,9 +69,9 @@ Notice that **Node.js 16** is required to run the frontend server.
 This demo system uses MySQL 5.7 for data storage. Enter your MySQL and execute these commands:
 ```sql
 -- Create database and user
-create database if not exists qevis_db2;
+create database if not exists qevis_db;
 create user 'qevis_user'@'%' identified by 'qevis_pwd';
-grant all privileges on qevis_db2.* to 'qevis_user'@'%';
+grant all privileges on qevis_db.* to 'qevis_user'@'%';
 flush privileges;
 -- Switch user and database, then create tables use DDL file
 soruce <project_root>/backend/database/qevis_ddl.sql;
