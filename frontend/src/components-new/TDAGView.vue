@@ -76,7 +76,7 @@
                           :offset="colorTick.percent + '%'" :stop-color="colorTick.color"/>
                     </linearGradient>
                 </defs>
-<!--                <rect fill="#f3f3f3" y=0 style="width: calc(100%);" :height="svgHeight"/>-->
+                <rect fill="#f3f3f3" y=0 style="width: calc(100%);" :height="svgHeight"/>
                 <g class="grid">
 <!--                  <line v-for = "(num) in bgLine" v-bind:key = "num"-->
 <!--                      :x1="num" y1="0" :x2="num" y2="300" style="stroke:#ffffff;stroke-width:1.5; stroke-opacity: 1"/>-->
@@ -108,27 +108,27 @@
                                 <circle v-for="({dx, dy}, i) in pathModels" :key="i"
                                       :cx="dx" :cy="dy" r="2" fill="rgb(80, 80, 80)"></circle>
                             </g>
-<!--                            <g>-->
-<!--                                <rect v-for="(vertex) in renderedVertexes" v-bind:key="'rect-' + vertex.vid"-->
-<!--                                      :x="vertex.layout.x-1.5" :y="vertex.layout.y-11"-->
-<!--                                      :width="4 + getTextSize(getShortNodeLabel(vertex), '10px').width" height="13"-->
-<!--                                      rx="2" ry="2"-->
-<!--                                      :fill="'#ffffff'" opacity="0.6"/>-->
-<!--                                <text v-for="(vertex) in renderedVertexes" v-bind:key="'text-' + vertex.vid"-->
-<!--                                      :dx="vertex.layout.x" :dy="vertex.layout.y "-->
-<!--                                      style="font-size: 10px; user-select: none; pointer-events: none;">-->
-<!--                                    {{ getShortNodeLabel(vertex) }}-->
-<!--                                </text>-->
-<!--                            </g>-->
+                            <g>
+                                <rect v-for="(vertex) in renderedVertexes" v-bind:key="'rect-' + vertex.vid"
+                                      :x="vertex.layout.x-1.5" :y="vertex.layout.y-11"
+                                      :width="4 + getTextSize(getShortNodeLabel(vertex), '10px').width" height="13"
+                                      rx="2" ry="2"
+                                      :fill="'#ffffff'" opacity="0.6"/>
+                                <text v-for="(vertex) in renderedVertexes" v-bind:key="'text-' + vertex.vid"
+                                      :dx="vertex.layout.x" :dy="vertex.layout.y "
+                                      style="font-size: 10px; user-select: none; pointer-events: none;">
+                                    {{ getShortNodeLabel(vertex) }}
+                                </text>
+                            </g>
                         </g>
                     </g>
-<!--                    <g class="timeAxis" transform="translate(0, 20)">-->
-<!--                        <rect y=-20 fill="none" :width="width" height="20" opacity="1"></rect>-->
-<!--                    </g>-->
-<!--                    <g v-show="!app.showStepView" class="queryBar" :transform="'translate(' +[20,25] + ')'">-->
-<!--                      <rect :fill="'url(#grad-' + app.aid+'-query)'"-->
-<!--                            :width="queryBarLen" height="4"></rect>-->
-<!--                    </g>-->
+                    <g class="timeAxis" transform="translate(0, 20)">
+                        <rect y=-20 fill="none" :width="width" height="20" opacity="1"></rect>
+                    </g>
+                    <g v-show="!app.showStepView" class="queryBar" :transform="'translate(' +[20,25] + ')'">
+                      <rect :fill="'url(#grad-' + app.aid+'-query)'"
+                            :width="queryBarLen" height="4"></rect>
+                    </g>
                 </g>
 
                 <g v-if="!loaded">
@@ -137,31 +137,31 @@
                     </text>
                 </g>
                 <g class="detailStructure"></g>
-<!--                <g class="legend-container-0" v-show="loaded && !app.showStepView"-->
-<!--                   :transform="'translate(' + [8, svgHeight-15] + ')'">-->
-<!--                    <rect x="-5" y="-5" width="122" height="20"-->
-<!--                          rx="4" ry="4"-->
-<!--                          :fill="'#ffffff'" opacity="0.6"/>-->
-<!--                    <rect :x="0" :y="0"-->
-<!--                          :stroke="'gray'" :stroke-width="0.5"-->
-<!--                          :width="60" :height="10"-->
-<!--                          :fill="'url(#grad-' + app.aid + '-legend)'"></rect>-->
-<!--                    <text :dx="65" :dy="9.5" style="font-size: 12px; user-select: none">Task No.</text>-->
-<!--                </g>-->
-<!--                <g class="legend-container-1" v-show="loaded && app.showStepView"-->
-<!--                   :transform="'translate(' + [8, svgHeight-80] + ')'">-->
-<!--                    <rect x="-5" y="-5" width="90" height="80"-->
-<!--                          rx="4" ry="4"-->
-<!--                          :fill="'#ffffff'" opacity="0.6"/>-->
-<!--                    <rect v-for="(color, i) in layoutConfig.stepColors" :key="'rect-' + i"-->
-<!--                          :x="0" :y="16 * i" rx="2" ry="2"-->
-<!--                          :stroke="'gray'" :stroke-width="0.5"-->
-<!--                          :fill="color"-->
-<!--                          :width="10" :height="10"></rect>-->
-<!--                    <text v-for="(stepName, i) in stepNames" :key="'label' + i"-->
-<!--                          style="font-size: 12px; user-select: none"-->
-<!--                          :dx="14" :dy="9 + 16 * i">{{stepName}}</text>-->
-<!--                </g>-->
+                <g class="legend-container-0" v-show="loaded && !app.showStepView"
+                   :transform="'translate(' + [8, svgHeight-15] + ')'">
+                    <rect x="-5" y="-5" width="122" height="20"
+                          rx="4" ry="4"
+                          :fill="'#ffffff'" opacity="0.6"/>
+                    <rect :x="0" :y="0"
+                          :stroke="'gray'" :stroke-width="0.5"
+                          :width="60" :height="10"
+                          :fill="'url(#grad-' + app.aid + '-legend)'"></rect>
+                    <text :dx="65" :dy="9.5" style="font-size: 12px; user-select: none">Task No.</text>
+                </g>
+                <g class="legend-container-1" v-show="loaded && app.showStepView"
+                   :transform="'translate(' + [8, svgHeight-52] + ')'">
+                    <rect x="-5" y="-5" width="80" height="52"
+                          rx="4" ry="4"
+                          :fill="'#ffffff'" opacity="0.6"/>
+                    <rect v-for="(color, i) in layoutConfig.stepColors" :key="'rect-' + i"
+                          :x="0" :y="16 * i" rx="2" ry="2"
+                          :stroke="'gray'" :stroke-width="0.5"
+                          :fill="color"
+                          :width="10" :height="10"></rect>
+                    <text v-for="(stepName, i) in stepNames" :key="'label' + i"
+                          style="font-size: 12px; user-select: none"
+                          :dx="14" :dy="9 + 16 * i">{{stepName}}</text>
+                </g>
 
             </svg>
             <el-radio-group v-if="!app.showStepView" :fill="'#999999'"
@@ -170,8 +170,6 @@
                 <el-radio-button :label="stepSelector[1]">{{stepSelector[1]}}</el-radio-button>
                 <el-radio-button :label="stepSelector[2]">{{stepSelector[2]}}</el-radio-button>
                 <el-radio-button :label="stepSelector[3]">{{stepSelector[3]}}</el-radio-button>
-                <el-radio-button :label="stepSelector[4]">{{stepSelector[4]}}</el-radio-button>
-                <el-radio-button :label="stepSelector[5]">{{stepSelector[5]}}</el-radio-button>
             </el-radio-group>
         </el-row>
         <el-row v-if="app.showPerformance">
@@ -192,7 +190,7 @@ import {HighlightMode} from "@/utils/const/HightlightMode";
 import PerformanceMatrix from "@/components-new/PerformanceMatrix/PerformanceMatrix";
 import RecvHeatmap from "@/components/Task/RecvHeatmap";
 import {TDAGLayoutType} from "@/utils/const/TDAGLayoutType";
-import {StepType} from "@/utils/const/StepType";
+import {STEP_NAMES, StepType} from "@/utils/const/StepType";
 
 const curveGen = d3.line().x(p => p[0]).y(p => p[1]).curve(d3.curveBasis)
 
@@ -234,13 +232,7 @@ export default {
             boundLeft : 0,
             zoom: null,
             domain: null,
-            stepNames: [
-                'Initialization',
-                'Input/Shuffle',
-                'Processor',
-                'Sink',
-                'Spill/Output',
-            ],
+            stepNames: STEP_NAMES,
             overallExtend: new Map(),
             stepSelectorIndex: 0,
             ratioName: "Overall",
@@ -528,17 +520,12 @@ export default {
       },
 
         getTrend(taskList) {
+          // console.log(taskList)
             let usage = [];
             let trend = [];
             let count = 0;
             if (this.stepSelectorIndex !== 0){
-              let index = this.stepSelectorIndex
-
-              if (taskList[0].stepMap.has(5)){
-                  index += 4
-              }else{
-                index -= 1
-              }
+              let index = this.stepSelectorIndex - 1
               taskList.forEach(task => {
                     if (!task.stepMap) {
                         return;
@@ -555,12 +542,12 @@ export default {
                     if (!task.stepMap) {
                         return;
                     }
-                    if (!task.stepMap.has(10) || !task.stepMap.has(11)){
+                    if (!task.stepMap.has(3) || !task.stepMap.has(4)){
                         return
                     }
                     //TODO modify here
-                    usage.push({'type': 'start', 'time': task.stepMap.get(10).start, "taskId":task.tid});
-                    usage.push({'type': 'end', 'time': task.stepMap.get(11).end, "taskId":task.tid});
+                    usage.push({'type': 'start', 'time': task.stepMap.get(3).start, "taskId":task.tid});
+                    usage.push({'type': 'end', 'time': task.stepMap.get(4).end, "taskId":task.tid});
                 })
             }
             usage.sort((a, b) => (a.time > b.time) ? 1 : -1);

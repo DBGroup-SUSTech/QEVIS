@@ -27,8 +27,8 @@ import java.util.*;
 @SpringBootTest
 public class Loader {
 
-//    public static final String DATA_PATH = "C:\\Users\\47984\\Documents\\Code\\Research\\QEVIS\\HvTracer\\data5";
-    public static final String DATA_PATH = "/home/zhengxin/qevis/HvTracer/data5";
+    // You need to replace the placeholder `<project root>`.
+    public static final String DATA_PATH = "<project root>/data_process/data";
 
     private static final List<String> EXCLUSIVE_APPS = new LinkedList<>();
     static {
@@ -82,13 +82,13 @@ public class Loader {
 //            System.out.println();
 //        }
 
-//        loadAllApplication();
-//        loadAllVertex();
-//        loadAllTask();
-//        loadAllCounter();
-//        loadAllTransfer();
-//        loadAllRecord();
-//        loadAllEvent();
+        loadAllApplication();
+        loadAllVertex();
+        loadAllTask();
+        loadAllCounter();
+        loadAllTransfer();
+        loadAllRecord();
+        loadAllEvent();
         loadAllDiagnose();
     }
 

@@ -5,24 +5,14 @@
        @mouseleave="leaveNode"
     >
         <g v-show="!showStepView">
-<!--            <rect :height="vertex.layout.height"-->
-<!--                  :width="vertex.layout.width"-->
-<!--                  :stroke="getNodeStroke()"-->
-<!--                  :stroke-width="getStrokeWidth()"-->
-<!--                  :fill="'url(#grad-' + app.aid+'-'+vertex.vid + ')'"-->
-<!--                  rx="1" ry="1"-->
-<!--                  class="vertex-rect">-->
-<!--                <title>{{ getNodeLabel() }}</title>-->
-<!--            </rect>-->
-<!--          for screenshot-->
             <rect :height="vertex.layout.height"
                   :width="vertex.layout.width"
-                  :stroke="'#488cba'"
+                  :stroke="getNodeStroke()"
                   :stroke-width="getStrokeWidth()"
-                  :fill="'#488cba'"
+                  :fill="'url(#grad-' + app.aid+'-'+vertex.vid + ')'"
                   rx="1" ry="1"
                   class="vertex-rect">
-              <title>{{ getNodeLabel() }}</title>
+                <title>{{ getNodeLabel() }}</title>
             </rect>
 <!--            <text dy="2" style="font-size: 10px;">{{ getShortNodeLabel() }}</text>-->
         </g>
@@ -123,9 +113,8 @@ export default {
     },
     computed: {
         stepDataList() {
-            const idxOffset = this.vertex.type === 'Map' ? 0 : 5;
             const stepDataList = [];
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 3; i++) {
                 stepDataList.push({
                     timeSum: 0,
                     offsetX: 0,
@@ -138,14 +127,15 @@ export default {
                 if (!t.stepMap) {
                     return;
                 }
-                for (let i = 0; i < 5; i++) {
-                    if (!t.stepMap.has(i + idxOffset)) {
+                for (let i = 0; i < 3; i++) {
+                    if (!t.stepMap.has(i)) {
                         continue;
                     }
-                    const step = t.stepMap.get(i + idxOffset);
+                    const step = t.stepMap.get(i);
                     if (!step) {
                         continue;
                     }
+
                     stepDataList[i].timeSum += step.end - step.start;
                 }
             });

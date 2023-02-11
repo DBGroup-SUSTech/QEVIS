@@ -345,32 +345,6 @@ function simpleTreeLayout(tdagModel) {
  * @returns {{nodeDataMap: Map<number|string, VertexLayoutData>, edgeDataMap: Map<number|string, EdgeLayoutData>}}
  */
 function computeLayoutInfoSimpleTreeLayout(vertexes, gapTime) {
-    // for query 49
-    // const vertexNames = ['Map 26', 'Map 12', 'Reducer 18', 'Map 27', 'Reducer 19', 'Reducer 20',
-    //     'Reducer 21', 'Reducer 22', 'Map 24', 'Reducer 13', 'Map 25', 'Reducer 14',
-    //     'Reducer 15', 'Reducer 16', 'Reducer 17', 'Map 23', 'Map 1', 'Reducer 2', 'Reducer 3',
-    //     'Reducer 4', 'Reducer 5', 'Reducer 6', 'Reducer 8', 'Reducer 10', 'Reducer 11']
-    // for query 54
-    const vertexNames = ['Map 22', 'Reducer 28', 'Reducer 25', 'Reducer 26', 'Reducer 27',
-        'Reducer 23', 'Reducer 24', 'Map 11', 'Map 10', 'Map 12', 'Map 18', 'Map 19',
-        'Reducer 14', 'Map 20', 'Reducer 15', 'Map 21', 'Reducer 16', 'Reducer 17',
-        'Map 1', 'Map 9', 'Reducer 2', 'Reducer 3', 'Reducer 4', 'Reducer 5',
-        'Reducer 6', 'Reducer 7', 'Reducer 8']
-    // for query 5
-    // const vertexNames = ['Map 24', 'Map 22', 'Reducer 23', 'Map 25', 'Map 9', 'Map 20',
-    //     'Reducer 13', 'Reducer 14', 'Map 18', 'Map 16', 'Reducer 10', 'Map 19',
-    //     'Reducer 11', 'Reducer 12', 'Map 1', 'Map 8', 'Map 15', 'Reducer 3',
-    //     'Reducer 4', 'Reducer 6', 'Reducer 7']
-
-    vertexes.sort((v, w) =>
-        vertexNames.indexOf(v.vertexName) - vertexNames.indexOf(w.vertexName))
-    vertexes.forEach(v => {
-        v.srcVertexes.sort((v, w) =>
-            vertexNames.indexOf(v.vertexName) - vertexNames.indexOf(w.vertexName))
-        v.dstVertexes.sort((v, w) =>
-            vertexNames.indexOf(v.vertexName) - vertexNames.indexOf(w.vertexName))
-    })
-
     // get ready for the layout algo
     let graph = new Graph()
     vertexes.forEach(vertex => {

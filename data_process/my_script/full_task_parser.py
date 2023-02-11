@@ -59,11 +59,10 @@ def gen_all_mons(mon_lst):
 if __name__ == '__main__':
     indent = None
 
-    DATA_SET = 'data5'
+    DATA_SET = 'data'
 
     def gen_batch():
         names = list(os.listdir(os.path.join(ROOT_PATH, DATA_SET)))
-        names = ['Example19']
         for name in names:
             print('parse full task data:', name)
             start_time = time.time()

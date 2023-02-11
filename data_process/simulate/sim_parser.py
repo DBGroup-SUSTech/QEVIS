@@ -188,14 +188,11 @@ def generate_sim_file(input_path, output_path):
 
 
 if __name__ == '__main__':
-    # generate_sim_file('data2/ExampleTest/info.log', 'data2/ExampleTest/output/SimulationFile.json')
 
-    DATA_SET = 'data5'
+    DATA_SET = 'data'
 
     def gen_batch():
-        # names = [f'Example{i}' for i in range(36, 38)]
-        names = ['Example19']
-        # names = list(os.listdir(os.path.join(ROOT_PATH, DATA_SET)))
+        names = list(os.listdir(os.path.join(ROOT_PATH, DATA_SET)))
         for name in names:
             start_time = time.time()
 

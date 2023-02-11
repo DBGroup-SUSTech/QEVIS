@@ -66,11 +66,9 @@
                            v-model="perShowList" size="mini">
             <el-checkbox-button label="duration_score">Duration</el-checkbox-button>
             <el-checkbox-button label="parallel_score">Parallelism</el-checkbox-button>
-            <el-checkbox-button label="step_duration_score_0">Initialization</el-checkbox-button>
-            <el-checkbox-button label="step_duration_score_1">Input/Shuffle</el-checkbox-button>
-            <el-checkbox-button label="step_duration_score_2">Processor</el-checkbox-button>
-            <el-checkbox-button label="step_duration_score_3">Sink</el-checkbox-button>
-            <el-checkbox-button label="step_duration_score_4">Spill/Output</el-checkbox-button>
+            <el-checkbox-button label="step_duration_score_0">Input</el-checkbox-button>
+            <el-checkbox-button label="step_duration_score_1">Processing</el-checkbox-button>
+            <el-checkbox-button label="step_duration_score_2">Output</el-checkbox-button>
         </el-checkbox-group>
 
     </div>
@@ -100,8 +98,6 @@ export default {
                 'step_duration_score_0',
                 'step_duration_score_1',
                 'step_duration_score_2',
-                'step_duration_score_3',
-                'step_duration_score_4',
             ],
         }
     },
@@ -119,8 +115,6 @@ export default {
             "step_duration_score_0" : this.perShowList.indexOf('step_duration_score_0') !== -1,
             "step_duration_score_1" : this.perShowList.indexOf('step_duration_score_1') !== -1,
             "step_duration_score_2" : this.perShowList.indexOf('step_duration_score_2') !== -1,
-            "step_duration_score_3" : this.perShowList.indexOf('step_duration_score_3') !== -1,
-            "step_duration_score_4" : this.perShowList.indexOf('step_duration_score_4') !== -1,
           }
       },
       diagnoseParamMatrix(){
@@ -140,12 +134,6 @@ export default {
           "step_duration_score_2":{
             'color': this.layoutConfig.stepColors[2],
           },
-          "step_duration_score_3":{
-            'color': this.layoutConfig.stepColors[3],
-          },
-          "step_duration_score_4":{
-            'color': this.layoutConfig.stepColors[4],
-          },
         }
       },
 
@@ -164,6 +152,8 @@ export default {
         },
         vecNameList(){
             return [...new Set(this.vecMachineList.map(d=>d.vec_name))]
+                .sort((name1, name2) =>
+                    this.vecPerObj[name2].vertex_impact - this.vecPerObj[name1].vertex_impact)
         },
         vecMachineList(){
             return this.app.diagnoseData.vec_machine_df

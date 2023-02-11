@@ -1,26 +1,16 @@
 /** @type {string[]} */
-const STEP_NAMES = [
-    'Initialization',
+export const STEP_NAMES = [
     'Input',
-    'Processor',
-    'Sink',
-    'Spill',
-
-    'Initialization',
-    'Shuffle',
-    'Processor',
-    'Sink',
-    'Output',
-];
+    'Processing',
+    'Output'
+]
 
 /** @type {string[]} */
 const STEP_SELECTORS = [
     'Overall',
-    'Initialization',
-    'Input/Shuffle',
-    'Processor',
-    'Sink',
-    'Spill/Output'
+    'Input',
+    'Processing',
+    'Output'
 ]
 
 /**
@@ -37,26 +27,16 @@ function getStepName(stepType) {
 
 
 /**
- * @enum {number}
  * @readonly
  */
 export const StepType = {
-    M_INIT: 0,
-    M_INPUT: 1,
-    M_PROC: 2,
-    M_SINK: 3,
-    M_SPILL: 4,
+    INPUT: 0,
+    PROCESS: 1,
+    OUTPUT: 2,
 
-    R_INIT: 5,
-    R_SHUFFLE: 6,
-    R_PROC: 7,
-    R_SINK: 8,
-    R_OUTPUT: 9,
-
-    START: 10,
-    END: 11,
+    START: 3,
+    END: 4,
 
     getStepName: getStepName,
-
     STEP_SELECTORS: STEP_SELECTORS,
 };

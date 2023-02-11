@@ -42,6 +42,7 @@ export function loadStaticTasks(app, fullTasks) {
 
 export function loadStaticTaskStepInfo(app, stepInfo) {
     const taskMap = app.taskMap;
+    // console.log(taskMap, stepInfo)
     stepInfo.forEach(step => {
         const task = taskMap.get(step.tid);
         if (!task.stepMap) {

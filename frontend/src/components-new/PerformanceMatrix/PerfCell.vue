@@ -6,7 +6,7 @@
               fill="black" :fill-opacity="fillOpacity" rx="2"></rect>
         <g :transform="'translate(' + [colWidth / 2, rowHeight / 2] + ')'">
             <path v-for="(pathObj, index) in pathList" :key="index"
-                  :fill="pathObj.stroke" stroke="white" stroke-width="0.5"
+                  :fill="pathObj.stroke" stroke="white" stroke-width="0"
                   :d="pathObj.path"></path>
             <circle :cx="0" :cy="0" :r="colWidth / 2 * 0.8"
                     fill-opacity="0" stroke="steelblue" stroke-width="0.5">

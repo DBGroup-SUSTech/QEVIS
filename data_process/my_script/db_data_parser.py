@@ -43,6 +43,6 @@ def process_dir(application_path):
 
 
 if __name__ == '__main__':
-    data_path = os.path.join(ROOT_PATH, 'data5')
+    data_path = os.path.join(ROOT_PATH, 'data')
     for name in os.listdir(data_path):
         process_dir(os.path.join(data_path, name))

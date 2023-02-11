@@ -59,10 +59,8 @@ def merge_data(example_path):
 
 if __name__ == '__main__':
 
-    DATA_SET = 'data5'
+    DATA_SET = 'data'
 
-    # names = [f'Example{i}' for i in [23]]
-    # names = ['query5_0']
     names = list(os.listdir(os.path.join(ROOT_PATH, DATA_SET)))
     for name in names:
         example_path = os.path.join(ROOT_PATH, f'{DATA_SET}/{name}')

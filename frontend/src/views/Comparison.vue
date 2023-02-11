@@ -30,7 +30,7 @@
                                     <span style="font-size: 1em; margin-left: 5px;">{{ index + ' ' + app.queryName }}</span>
 
 
-                                    <el-icon v-if="index <=1" class="el-icon-loading mini-icon"
+                                    <el-icon v-if="index <= -1" class="el-icon-loading mini-icon"
                                              style="margin-left: auto"/>
                                     <el-icon v-else class="el-icon-finished mini-icon" style="margin-left: auto"/>
 
@@ -137,7 +137,7 @@
                 <el-col :span="5" style="height: 100%">
                     <el-row class="boundary" style="height: 100%; width: 100%; overflow: hidden;">
                         <div class="mini_head">
-                            <div class='mini_title'>System View</div>
+                            <div class='mini_title'>Task View</div>
                         </div>
                         <div class="machine-view-container" style="height: calc(100% - 30px); width: 100%;">
                             <MachineView v-if="appShowingTask"

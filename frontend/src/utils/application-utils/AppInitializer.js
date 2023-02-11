@@ -158,11 +158,11 @@ function bindDAGInformation(app, dagData) {
     app.vertexes.forEach(vertex => vertexName2vertex.set(vertex.vertexName, vertex));
 
     app.vertexes.forEach(vertex => {
-        if (!vertexName2node.get(vertex.vertexName)) {
-            console.log(nodes)
-            console.log(vertexName2node, vertex.vertexName, vertex)
-            console.log(app)
-        }
+        // if (!vertexName2node.get(vertex.vertexName)) {
+        //     console.log(nodes)
+        //     console.log(vertexName2node, vertex.vertexName, vertex)
+        //     console.log(app)
+        // }
         const node = vertexName2node.get(vertex.vertexName);
         vertex.srcVertexes = node.srcNodes
             .map(node => vertexName2vertex.get(node.name));

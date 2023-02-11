@@ -39,9 +39,9 @@ export const LayoutConfig = {
   stepColors: [
     "rgba(203,213,232,1)",
     "rgba(179,226,205,1)",
-    "rgba(230,245,201, 1)",
-    "rgba(244,202,228,1)",
     "rgba(253,205,172,1)",
+    // "rgba(244,202,228,1)",
+    // "rgba(230,245,201, 1)",
 
   ],
   outlierColors: ["#d92b2b", "#3469f8", "#e8e8e8"],

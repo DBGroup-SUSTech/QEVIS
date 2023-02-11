@@ -12,7 +12,7 @@ from myio.common_io import read_json_obj, write_lines
 if __name__ == '__main__':
     diagnose = Diagnose()
 
-    DATA_SET = 'data5'
+    DATA_SET = 'data'
 
     indent = None
 
