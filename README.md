@@ -69,9 +69,9 @@ Notice that **Node.js 16** is required to run the frontend server.
 This demo system uses MySQL 5.7 for data storage. Enter your MySQL and execute these commands:
 ```sql
 -- Create database and user
-create database if not exists qevis_db;
-create user 'qevis_user'@'%' identified by 'qevis_pwd';
-grant all privileges on qevis_db.* to 'qevis_user'@'%';
+create database if not exists qevis_db3;
+create user 'qevis_user3'@'%' identified by 'qevis_pwd';
+grant all privileges on qevis_db3.* to 'qevis_user3'@'%';
 flush privileges;
 -- Switch user and database, then create tables use DDL file
 soruce <project_root>/backend/database/qevis_ddl.sql;
@@ -102,7 +102,7 @@ Then modify the settings of Java backend for connecting to MySQL.
 # <project_root>/src/main/resources/application.yml
 ...
 # You need to replace the placeholder `<your_ip>` and `<your_port>` (3306 by default).
-url: jdbc:mysql://<your_ip>:<your_port>/qevis_db2?serverTimezone=UTC&rewriteBatchedStatements=true
+url: jdbc:mysql://<your_ip>:<your_port>/qevis_db?serverTimezone=UTC&rewriteBatchedStatements=true
 username: qevis_user
 password: qevis_pwd
 ...
@@ -122,6 +122,14 @@ cd <project_root>/backend
 mvn clean package test -Dtest="Loader#mainLoader"
 ```
 
+You will see the output:
+```
+Load application 0_Query49 OK
+...
+Load diagnose 4_Query54 OK
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 246.596 sec
+```
+
 ### Step 5: Launch application
 
 Frontend server needs to know the IP of backend. Modify the file:
@@ -129,7 +137,7 @@ Frontend server needs to know the IP of backend. Modify the file:
 // <project_root>/frontend/src/service/dataService2.js
 ...
 // You need to replace the placeholder <your_ip>
-const dataServerUrl = "http://<your_ip>:5000";
+const dataServerUrl = "http://<your_ip>:12000";
 ...
 ```
 
