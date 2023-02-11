@@ -45,7 +45,7 @@ python3.7 --version
 chmod 777 ./process.sh
 ./process.sh
 ```
-You will see `process done` on the screen when it finishs.
+You will see `process done` on the screen when it finishes.
 
 ### Step 3: Enviornment setup
 This demo system has a backend with SpringBoot and a frontend with Vue.js.
