@@ -493,61 +493,67 @@ const mutations = {
     loadRawApplications(state, rawApplications) {
         state.applications = [];
         state.applicationMap = new Map();
-        let idx = -1
-        let nameMap = {}
-        let preIdx = 0, transIdx = 0
+
+        // let idx = -1
+        // let nameMap = {}
+        // let preIdx = 0, transIdx = 0
+
         rawApplications.forEach(ra => {
-            idx += 1
-            if (idx >= 4 && idx <= 9){
+            const app = initApplication(ra)
+            state.applications.push(app);
+            state.applicationMap.set(app.aid, app);
 
-            }
-            else if (ra.query_name === "query49"){
-                 if (idx === 12 || idx ===19){
-                    const app = initApplication(ra)
-                    let vId = 0
-                    if (nameMap[ra.query_name] !== undefined){
-                        vId = nameMap[ra.query_name]+ 1
-                    }else{
-                        nameMap[ra.query_name] = vId
-                    }
-                    nameMap[ra.query_name] = vId
-                    app.queryName = "AP_trans49_" + vId
-                    state.applications.push(app);
-                    state.applicationMap.set(app.aid, app);
-                }
-            }else{
-                let vId = 0
-                if (nameMap[ra.query_name] !== undefined){
-                    vId = nameMap[ra.query_name]+ 1
-                }else{
-                    nameMap[ra.query_name] = vId
-                }
-                nameMap[ra.query_name] = vId
-
-                const app = initApplication(ra)
-                const transNames = ["prod_","cons_", "order_","sales_", "tax_", "trans_"]
-                const prefixName = ["CI_AP_", "PDI_AP_", "CLD_AP_", "PI_AP_", "PI_AP_"]
-                let tmp = app.queryName.split("query")[1]
-                if (tmp === undefined){
-                    tmp = "1"
-                }else{
-                    tmp = tmp.split("_")[0]
-                }
-
-                let name = prefixName[preIdx]
-                preIdx += 1
-                if (preIdx === 5)
-                    preIdx = 0
-
-                name += transNames[transIdx]
-                transIdx += 1
-                if (transIdx === 6)
-                    transIdx = 0
-                // app.queryName = "CLD_AP_"+tmp + vId
-                app.queryName = name + tmp + "_" +vId
-                state.applications.push(app);
-                state.applicationMap.set(app.aid, app);
-            }
+            // idx += 1
+            // if (idx >= 4 && idx <= 9){
+            //
+            // }
+            // else if (ra.query_name === "query49"){
+            //      if (idx === 12 || idx ===19){
+            //         const app = initApplication(ra)
+            //         let vId = 0
+            //         if (nameMap[ra.query_name] !== undefined){
+            //             vId = nameMap[ra.query_name]+ 1
+            //         }else{
+            //             nameMap[ra.query_name] = vId
+            //         }
+            //         nameMap[ra.query_name] = vId
+            //         app.queryName = "AP_trans49_" + vId
+            //         state.applications.push(app);
+            //         state.applicationMap.set(app.aid, app);
+            //     }
+            // }else{
+            //     let vId = 0
+            //     if (nameMap[ra.query_name] !== undefined){
+            //         vId = nameMap[ra.query_name]+ 1
+            //     }else{
+            //         nameMap[ra.query_name] = vId
+            //     }
+            //     nameMap[ra.query_name] = vId
+            //
+            //     const app = initApplication(ra)
+            //     const transNames = ["prod_","cons_", "order_","sales_", "tax_", "trans_"]
+            //     const prefixName = ["CI_AP_", "PDI_AP_", "CLD_AP_", "PI_AP_", "PI_AP_"]
+            //     let tmp = app.queryName.split("query")[1]
+            //     if (tmp === undefined){
+            //         tmp = "1"
+            //     }else{
+            //         tmp = tmp.split("_")[0]
+            //     }
+            //
+            //     let name = prefixName[preIdx]
+            //     preIdx += 1
+            //     if (preIdx === 5)
+            //         preIdx = 0
+            //
+            //     name += transNames[transIdx]
+            //     transIdx += 1
+            //     if (transIdx === 6)
+            //         transIdx = 0
+            //     // app.queryName = "CLD_AP_"+tmp + vId
+            //     app.queryName = name + tmp + "_" +vId
+            //     state.applications.push(app);
+            //     state.applicationMap.set(app.aid, app);
+            // }
         });
     },
     loadStaticTDAGDataToApp(state, {aid, tdagData}) {
@@ -636,39 +642,39 @@ const mutations = {
     },
 
     updateGroupedDomain(state,{app, newVal:newV, zoomXRatio: zoomXRatio, paintLenRatio: paintLenRatio}){
-      if (!newV){
-          state.groupedAppDomain.delete(app.aid);
-      }else{
-          state.groupedAppDomain.set(app.aid,app.tdagModel.xScale.domain());
-      }
-      let dg = [0,0];
-      let zoomScale = app.tdagModel.zoomScale;
-      // let appPaintLen = paintLenRatio * app.tdagModel.xScale.rang
-      Array.from(state.groupedAppDomain.entries()).forEach(entry => {
-              let [aid, domain] = entry;
-              dg[0] = d3.min([dg[0], domain[0]]);
-              dg[1] = d3.max([dg[1], domain[1]]);
+        if (!newV){
+            state.groupedAppDomain.delete(app.aid);
+        }else{
+            state.groupedAppDomain.set(app.aid,app.tdagModel.xScale.domain());
+        }
+        let dg = [0,0];
+        let zoomScale = app.tdagModel.zoomScale;
+        // let appPaintLen = paintLenRatio * app.tdagModel.xScale.rang
+        Array.from(state.groupedAppDomain.entries()).forEach(entry => {
+                let [aid, domain] = entry;
+                dg[0] = d3.min([dg[0], domain[0]]);
+                dg[1] = d3.max([dg[1], domain[1]]);
 
-              let app = state.applicationMap.get(aid);
-              let curRange = app.tdagModel.xScale.range();
-              let baseXScaleRange = app.tdagModel.baseXScaleRange[1];
-              if (zoomScale >= 0){
-                  app.tdagModel.updateXScaleRange(curRange[0], baseXScaleRange + zoomScale * baseXScaleRange)
-              }
-              else {
-                  app.tdagModel.updateXScaleRange(curRange[0], baseXScaleRange * Math.pow(2, zoomScale))
-              }
-              state.applicationMap.get(aid).tdagModel.zoomScale = zoomScale;
-              app.tdagModel.zoomXRatio = zoomXRatio;
-              app.tdagModel.paintLenRatio = paintLenRatio
-          }
-      );
-      state.groupDomain = dg;
-      state.globalDomainUpdate ^= 1
+                let app = state.applicationMap.get(aid);
+                let curRange = app.tdagModel.xScale.range();
+                let baseXScaleRange = app.tdagModel.baseXScaleRange[1];
+                if (zoomScale >= 0){
+                    app.tdagModel.updateXScaleRange(curRange[0], baseXScaleRange + zoomScale * baseXScaleRange)
+                }
+                else {
+                    app.tdagModel.updateXScaleRange(curRange[0], baseXScaleRange * Math.pow(2, zoomScale))
+                }
+                state.applicationMap.get(aid).tdagModel.zoomScale = zoomScale;
+                app.tdagModel.zoomXRatio = zoomXRatio;
+                app.tdagModel.paintLenRatio = paintLenRatio
+            }
+        );
+        state.groupDomain = dg;
+        state.globalDomainUpdate ^= 1
     },
 
     changeTdagViewWidth(state, tdagViewWidth) {
-       state.tdagViewWidth = tdagViewWidth;
+        state.tdagViewWidth = tdagViewWidth;
     },
 
     changeAppShowingTask(state, aid) {

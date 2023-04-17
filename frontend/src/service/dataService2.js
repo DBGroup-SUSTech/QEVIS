@@ -3,8 +3,8 @@ import axios from 'axios'
 
 Vue.prototype.axios = axios
 
-// const dataServerUrl = "http://localhost:12000";
-const dataServerUrl = "http://10.16.71.4:12000";
+// You need to replace the placeholder <your_ip>
+const dataServerUrl = "http://<your_ip>:12000";
 
 function getAppMetaList(param, callback){
     const url=`${dataServerUrl}/app-meta-list`;

@@ -91,13 +91,14 @@ Last command should print:
 | counter            |
 | diagnose           |
 | event              |
+| map_transfer       |
 | record             |
 | task               |
 | test_table         |
 | transfer           |
 | vertex             |
 +--------------------+
-9 rows in set (0.00 sec)
+10 rows in set (0.00 sec)
 ```
 
 Then modify the settings of Java backend for connecting to MySQL.
