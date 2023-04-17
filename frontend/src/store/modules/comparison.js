@@ -21,7 +21,7 @@ import {loadDynamic} from "@/utils/application-utils/UpdateLoader";
 import {TaskMatrixModel} from "@/utils/entities/TaskMatrixModel";
 import {changeHighlightTask, changeHighlightTasks, changeHighlightVertex} from "@/utils/application-utils/Interaction";
 import {loadStaticDiagnose} from "@/utils/application-utils/DiagnoseLoader";
-import {loadStaticAbnormalTransfers} from "@/utils/application-utils/TransferLoader";
+import {loadStaticAbnormalTransfers, loadStaticMapTransfers} from "@/utils/application-utils/TransferLoader";
 
 
 // const metrics = {
@@ -493,10 +493,61 @@ const mutations = {
     loadRawApplications(state, rawApplications) {
         state.applications = [];
         state.applicationMap = new Map();
+        let idx = -1
+        let nameMap = {}
+        let preIdx = 0, transIdx = 0
         rawApplications.forEach(ra => {
-            const app = initApplication(ra)
-            state.applications.push(app);
-            state.applicationMap.set(app.aid, app);
+            idx += 1
+            if (idx >= 4 && idx <= 9){
+
+            }
+            else if (ra.query_name === "query49"){
+                 if (idx === 12 || idx ===19){
+                    const app = initApplication(ra)
+                    let vId = 0
+                    if (nameMap[ra.query_name] !== undefined){
+                        vId = nameMap[ra.query_name]+ 1
+                    }else{
+                        nameMap[ra.query_name] = vId
+                    }
+                    nameMap[ra.query_name] = vId
+                    app.queryName = "AP_trans49_" + vId
+                    state.applications.push(app);
+                    state.applicationMap.set(app.aid, app);
+                }
+            }else{
+                let vId = 0
+                if (nameMap[ra.query_name] !== undefined){
+                    vId = nameMap[ra.query_name]+ 1
+                }else{
+                    nameMap[ra.query_name] = vId
+                }
+                nameMap[ra.query_name] = vId
+
+                const app = initApplication(ra)
+                const transNames = ["prod_","cons_", "order_","sales_", "tax_", "trans_"]
+                const prefixName = ["CI_AP_", "PDI_AP_", "CLD_AP_", "PI_AP_", "PI_AP_"]
+                let tmp = app.queryName.split("query")[1]
+                if (tmp === undefined){
+                    tmp = "1"
+                }else{
+                    tmp = tmp.split("_")[0]
+                }
+
+                let name = prefixName[preIdx]
+                preIdx += 1
+                if (preIdx === 5)
+                    preIdx = 0
+
+                name += transNames[transIdx]
+                transIdx += 1
+                if (transIdx === 6)
+                    transIdx = 0
+                // app.queryName = "CLD_AP_"+tmp + vId
+                app.queryName = name + tmp + "_" +vId
+                state.applications.push(app);
+                state.applicationMap.set(app.aid, app);
+            }
         });
     },
     loadStaticTDAGDataToApp(state, {aid, tdagData}) {
@@ -508,10 +559,11 @@ const mutations = {
         loadStaticCounters(app, counters);
     },
     loadStaticExecutionDataToApp(state, {aid, executionData}) {
-        const {records, abnormal_transfer} = executionData;
+        const {records, abnormal_transfer, map_trans} = executionData;
         const app = state.applicationMap.get(aid);
         loadStaticRecords(app, records);
         loadStaticAbnormalTransfers(app, abnormal_transfer);
+        loadStaticMapTransfers(app, map_trans);
     },
     cacheTransferList(state, {aid, tid, transferList}) {
         const app = state.applicationMap.get(aid);

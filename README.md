@@ -41,9 +41,9 @@ cd <project_root>/data-process
 pip install -r requirements.txt
 # Check Python command
 python3.7 --version
-# Run data process script
+# Run process script
 chmod 777 ./process.sh
-./process.sh
+./process.sh ./data
 ```
 You will see `process done` on the screen when it finishes.
 
@@ -71,7 +71,7 @@ This demo system uses MySQL 5.7 for data storage. Enter your MySQL and execute t
 -- Create database and user
 create database if not exists qevis_db;
 create user 'qevis_user'@'%' identified by 'qevis_pwd';
-grant all privileges on qevis_db.* to 'qevis_user3'@'%';
+grant all privileges on qevis_db.* to 'qevis_user'@'%';
 flush privileges;
 -- Switch user and database, then create tables use DDL file
 soruce <project_root>/backend/database/qevis_ddl.sql;
@@ -80,19 +80,19 @@ show tables;
 
 Last command should print:
 ```
-+---------------------+
-| Tables_in_qevis_db2 |
-+---------------------+
-| application         |
-| counter             |
-| diagnose            |
-| event               |
-| record              |
-| task                |
-| test_table          |
-| transfer            |
-| vertex              |
-+---------------------+
++--------------------+
+| Tables_in_qevis_db |
++--------------------+
+| application        |
+| counter            |
+| diagnose           |
+| event              |
+| record             |
+| task               |
+| test_table         |
+| transfer           |
+| vertex             |
++--------------------+
 9 rows in set (0.00 sec)
 ```
 

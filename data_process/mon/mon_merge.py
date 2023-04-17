@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import sys
@@ -17,6 +18,10 @@ def merge_data(example_path):
     MON_FILE_PATH = os.path.join(example_path, 'mon')
     SIM_FILE_PATH = os.path.join(example_path, 'output/SimulationFile.json')
     SIM_MON_PATH = os.path.join(example_path, 'output/MonitorFile.json')
+
+    if os.path.exists(SIM_MON_PATH):
+        print('not to generate mon file')
+        return
 
     with open(SIM_FILE_PATH, 'r', encoding='utf-8') as fp:
         sim_obj = json.load(fp)
@@ -58,11 +63,13 @@ def merge_data(example_path):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Merge monitor files")
+    parser.add_argument('-d', '--dataset', type=str, required=True)
+    args = parser.parse_args()
 
-    DATA_SET = 'data'
-
-    names = list(os.listdir(os.path.join(ROOT_PATH, DATA_SET)))
+    dataset = args.dataset
+    names = list(os.listdir(os.path.join(ROOT_PATH, dataset)))
     for name in names:
-        example_path = os.path.join(ROOT_PATH, f'{DATA_SET}/{name}')
+        example_path = os.path.join(ROOT_PATH, f'{dataset}/{name}')
         print('merge mon data:', name)
         merge_data(example_path)

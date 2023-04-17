@@ -1,0 +1,132 @@
+{
+  hosts: [
+    "dbg02",
+    "dbg03",
+    "dbg04",
+    "dbg07",
+    "dbg08",
+    "dbg09",
+  ],
+  tasks: [
+//    {
+//      query_name: "Demo-Query1-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query1.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query2-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query2.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query3-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query3.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query4-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query4.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query5-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query5.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query6-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query6.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query7-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query7.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query8-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query8.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query9-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query9.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query10-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query10.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query11-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query11.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query12-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query12.sql",
+//      database: "tpcds_50",
+//    },
+//    {
+//      query_name: "Demo-Query13-0",
+//      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query13.sql",
+//      database: "tpcds_50",
+//    },
+    {
+      query_name: "Demo-Query14-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query14.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query15-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query15.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query16-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query16.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query17-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query17.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query18-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query18.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query19-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query19.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query20-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query20.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query21-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query21.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query22-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query22.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query23-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query23.sql",
+      database: "tpcds_50",
+    },
+    {
+      query_name: "Demo-Query24-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query24.sql",
+      database: "tpcds_50",
+    },
+  ],
+}

@@ -1,15 +1,48 @@
 <template>
     <div style="padding-right: 5px;">
-        <el-select v-if="finishLoading" size="mini"
-                   style="margin-top: 5px; margin-left: 18px; width: 200px; float: left;"
-                   v-model="value" placeholder="Please select">
-            <el-option
-                    v-for="item in options"
-                    :key="item"
-                    :label="item"
-                    :value="item">
-            </el-option>
-        </el-select>
+        <el-row v-if="finishLoading">
+          <el-col v-if="value === 'Duration'" :span="13">
+            <el-select size="mini"
+                       style="margin-top: 5px; margin-left: 18px; width: 180px; float: left;"
+                       v-model="value" placeholder="Please select">
+                <el-option
+                        v-for="item in options"
+                        :key="item"
+                        :label="item"
+                        :value="item">
+                </el-option>
+            </el-select>
+          </el-col>
+          <el-col v-if="value !== 'Duration'" :span="6">
+            <el-select size="mini"
+                       style="margin-top: 5px; margin-left: 18px; width: 120px; float: left;"
+                       v-model="value" placeholder="Please select">
+              <el-option
+                  v-for="item in options"
+                  :key="item"
+                  :label="item"
+                  :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col v-if="value !== 'Duration'" :span="6">
+            <el-select size="mini"
+                       style="margin-top: 5px; margin-left: 60px; width: 120px; float: left;"
+                       v-model="value2" placeholder="Please select">
+              <el-option
+                  v-for="item in options2"
+                  :key="item"
+                  :label="item"
+                  :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col v-if="value !== 'Duration'" :span="5" :offset="7" class="slider">
+<!--            Outlier Controller-->
+            <el-slider
+                       v-model="outlierBound" :step="10" :min="0" :max="100" :format-tooltip="formatTooltip"></el-slider>
+          </el-col>
+        </el-row>
         <svg v-if="treeModel && renderComponent" :height="totalHeight + 80" style="margin-top: 5px; width: 100%">
             <g class="content" transform="translate(20, 0)">
                 <g v-for="(vertex, index) in vertexList" :key="vertex.vid" style="padding-right: 10px;">
@@ -30,7 +63,11 @@
                                :dstNestMap="dstNestMap"
                                :timeScale="timeScale"
                                :contextType="value"
+                               :appendCtxType="value2"
+                               :outlierBound="outlierBound / 100"
                     ></VertexRow>
+<!--                  :dataLayoutTasks="vertexTasksMap.get(vertex.vertexName)"-->
+
                 </g>
             </g>
         </svg>
@@ -82,10 +119,17 @@ export default {
             values: undefined,
             dataCounters: undefined,
             options: ['Duration', 'TimeUsage'],
-            value: 'Duration'
+            value: 'Duration',
+
+            value2: 'Select Opinions',
+            outlierBound: 0,
+            options2:['No Second Metric','DataLayout']
         }
     },
     methods: {
+        formatTooltip(val){
+          return val + "%"
+        },
         recomputeSize() {
 
         },
@@ -169,7 +213,6 @@ export default {
         d3.selectAll('.dragComponents').each(function(_, i){
             d3.select(this).call(_this.dragFunc(i))
         })
-
         this.machineSize = this.unitHeight - this.marginY * 2 - 4 * 2
     },
     computed: {
@@ -177,6 +220,9 @@ export default {
             // finishLoading: state => !state.inLoading,
             app: state => state.appShowingTask,
         }),
+        appendCtxType(){
+          return this.app?.appendCtxType;
+        },
         treeModel() {
             return this.app?.treeModel;
         },
@@ -212,5 +258,16 @@ export default {
 .checkbox-group {
     margin-top: 10px;
     width: 200px;
+}
+/deep/ .el-slider__bar{
+  background: rgb(108, 109, 111);
+}
+/deep/ .el-slider__button{
+  width: 7px;
+  height: 7px;
+  border:2px solid grey;
+}
+/deep/ .el-slider__runway{
+  height: 4px;
 }
 </style>

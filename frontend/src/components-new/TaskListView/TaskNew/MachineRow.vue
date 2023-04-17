@@ -14,21 +14,40 @@
                      :showMax="false"
             ></PercBar>
         </g>
-        <g :transform="'translate(' + [taskDurationX, 0] + ')'">
+        <g v-if="initDone" :transform="'translate(' + [taskDurationX, 0] + ')'">
             <DurationBar v-if="contextType === 'Duration'"
                          :height="machine.config.unitHeight" :width="taskLength" :strokeColor="strokeColor"
                          :start="taskStart" :end="taskEnd" :barHeight="machineSize" :timeScale="timeScale"
             ></DurationBar>
+            <DataLayoutBar v-else-if="contextType === 'DataLayout'"
+                           :tScale="dataLayoutScale"
+                           :dataList="machineDataSize"
+                           :height="machine.config.unitHeight" :width="taskLength" :barHeight="machineSize" :marginLR="10"
+            ></DataLayoutBar>
             <DensityBar v-else-if="contextType === 'TimeUsage' && dataSummary !== undefined"
                         :tScale="tScale"
                         :dataList="dataSummary['TimeUsageList']"
                         :height="machine.config.unitHeight" :width="taskLength" :barHeight="machineSize" :marginLR="10"
+                        :appendCtxType="appendCtxType"
+                        :colorList="colorList"
+                        :isRenderColor="isRenderColor"
+                        :is-show-outlier="true"
+                        :sortedDataList="machinesMetricSorted['TimeUsage']"
+                        :outlier-num="machinesMetricSorted['TimeUsage'].length"
+                        :context-type="contextType"
             ></DensityBar>
 
-            <DensityBar v-else-if="metricScale !== undefined && metricSet != undefined"
+            <DensityBar v-else-if="metricScale !== undefined && metricSet !== undefined"
                         :tScale="metricScale[contextType]"
                         :dataList="metricSet[contextType]"
                         :height="machine.config.unitHeight" :width="taskLength" :barHeight="machineSize" :marginLR="10"
+                        :appendCtxType="appendCtxType"
+                        :colorList="colorList"
+                        :isRenderColor="isRenderColor"
+                        :is-show-outlier="true"
+                        :sortedDataList="machinesMetricSorted[contextType]"
+                        :outlier-num="machinesMetricSorted[contextType].length"
+                        :context-type="contextType"
             ></DensityBar>
         </g>
         <g v-if="machine.extend === true">
@@ -60,6 +79,10 @@
                          :contextType="contextType"
                          :tScale="tScale"
                          :metricScale="metricScale"
+                         :dataLayoutScale = "dataLayoutScale"
+                         :appendCtxType="appendCtxType"
+                         :outlierTasksIds="machinesMetricSorted"
+                         :outlierBound="outlierBound"
                 ></TaskRow>
             </g>
         </g>
@@ -74,6 +97,7 @@ import DurationBar from "@/components-new/TaskListView/TaskNew/subcomponents/Dur
 import DensityBar from "@/components-new/TaskListView/TaskNew/subcomponents/DensityBar";
 import {HighlightMode} from "@/utils/const/HightlightMode";
 import {mapState} from "vuex";
+import DataLayoutBar from "@/components-new/TaskListView/TaskNew/subcomponents/DataLayoutBar";
 // import Row from "./Row"
 export default {
     name: "Row",
@@ -81,9 +105,9 @@ export default {
         'index', 'brothers', 'cellWidth', 'timeScale', 'taskNum',
         'maxDuration', 'headConfig', 'strokeColor', 'textMarginY',
         'srcNestMap', 'dstNestMap', 'contextType', 'tScale', 'metricScale',
-            'vertexHover',
+            'vertexHover','dataLayoutScale','appendCtxType','metricSortedSet','targetOutlierTasksNum','outlierBound'
     ],
-    components:{ TaskRow, PercBar, DurationBar, DensityBar },
+    components:{DataLayoutBar, TaskRow, PercBar, DurationBar, DensityBar },
     data(){
         return {
             taskStart: 0,
@@ -93,6 +117,14 @@ export default {
             dataSummary: undefined,
             metricSet: undefined,
             machineHighlightMode: HighlightMode.NONE,
+
+            // dataLayoutScale:undefined,
+            dataLayoutLenList:[],
+            machineDataSize: {},
+            initDone: false,
+
+            colorList: [],
+            machinesMetricSorted:{}
         }
     },
     mounted(){
@@ -106,22 +138,72 @@ export default {
         // this.subvalues = this.machine.values
 
         this.dataSummary = {}
+        this.machinesMetricSorted = {}
         this.app.counterKeys.forEach(key=>{
             this.dataSummary[key] = d3.extent(this.machine.taskTreeModelList, task => task.counter[key])
         })
         this.dataSummary['TimeUsageList'] = this.machine.taskTreeModelList.map(task=>task.end - task.start)
 
+        let outlier_ids = new Set()
+        this.metricSortedSet["TimeUsage"].slice(0 - this.targetOutlierTasksNum).forEach(item => {
+          outlier_ids.add(item["taskId"])
+        })
+        let metricsTmp = [], idx = 0
+        this.machine.taskTreeModelList.forEach(task => {
+          if (outlier_ids.has(task.tid)){
+            metricsTmp.push({"taskId": task.tid, "listIdx": idx})
+          }
+          idx += 1
+        })
+        this.machinesMetricSorted["TimeUsage"] = metricsTmp
+
+        let machineDataSize = this.machineDataSize
+        // let totalSum = 0
+        this.machine.taskTreeModelList.forEach(t => {
+          let c = 'black'
+          if (t.vertex.type === 'Map'){
+            if (t.mapTrans[0]){
+              if (t.mapTrans[0].machine && this.machine.machineName !==t.mapTrans[0].machine){
+                c = 'red'
+              }
+            }
+          }
+          this.colorList.push(c)
+          t.mapTrans.forEach(item => {
+            let src = item.machine
+            if (!machineDataSize[src]){
+              machineDataSize[src] = 0
+            }
+            machineDataSize[src] += item.length
+            // totalSum += item.length
+          })
+        })
+        // console.log(machineDataSize, this.taskLength)
+        // this.dataLayoutScale = d3.scaleLinear().domain([0, totalSum]).range([0, this.taskLength])
+
         this.metricSet = {}
 
         this.app.counterKeys.forEach(key=>{
-            const metric = []
+            const metric = [], tmp = []
+            let idx = 0
             this.metricSet[key] = metric
+            this.machinesMetricSorted[key] = tmp
+
+            outlier_ids.clear()
+            this.metricSortedSet[key].slice(0 - this.targetOutlierTasksNum).forEach(item => {
+              outlier_ids.add(item["taskId"])
+            })
             this.machine.taskTreeModelList.forEach(task => {
                 if (key in task.counter) {
                     metric.push(task.counter[key])
+                    if (outlier_ids.has(task.tid)){
+                      tmp.push({"taskId":task.tid, "listIdx": idx})
+                    }
+                    idx += 1
                 }
             })
         })
+      this.initDone = true
     },
     methods: {
         click() {
@@ -151,6 +233,49 @@ export default {
         }
     },
     watch: {
+        targetOutlierTasksNum(){
+          this.initDone = false
+          let outlier_ids = new Set()
+          let sliceNum = 0 - this.targetOutlierTasksNum
+          if (this.outlierBound !== 1){
+            this.metricSortedSet["TimeUsage"].slice(sliceNum).forEach(item => {
+              outlier_ids.add(item["taskId"])
+            })
+          }
+
+          let metricsTmp = [], idx = 0
+          this.machine.taskTreeModelList.forEach(task => {
+            if (outlier_ids.has(task.tid)){
+              metricsTmp.push({"taskId": task.tid, "listIdx": idx})
+            }
+            idx += 1
+          })
+          this.machinesMetricSorted["TimeUsage"] = metricsTmp
+
+          this.app.counterKeys.forEach(key=>{
+            const tmp = []
+            let idx = 0
+            this.machinesMetricSorted[key] = tmp
+
+            outlier_ids.clear()
+            if (this.outlierBound !== 1){
+              this.metricSortedSet[key].slice(sliceNum).forEach(item => {
+              outlier_ids.add(item["taskId"])
+            })}
+
+            this.machine.taskTreeModelList.forEach(task => {
+              if (key in task.counter) {
+                if (outlier_ids.has(task.tid)){
+                  tmp.push({"taskId":task.tid, "listIdx": idx})
+                }
+                idx += 1
+              }
+            })
+          })
+          this.initDone = true
+        },
+        appendCtxType(){
+        },
         totalHeight(){
             this.machine.config.height = this.totalHeight + this.machine.config.unitHeight
         },
@@ -170,6 +295,9 @@ export default {
         ...mapState('comparison', {
             colorSchema: state => state.colorSchema,
         }),
+        isRenderColor(){
+          return this.appendCtxType === "DataLayout"
+        },
         taskListHighlightSign() {
             return this.app.signs.taskListHighlightSign;
         },

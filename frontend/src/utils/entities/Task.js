@@ -16,6 +16,8 @@ export class Task {
     stepMap
     /** @type {Object} */
     counter = {}
+    /** @type {{machine: string, length: number}[]} */
+    mapTrans = []
 
     interact = {
         highlightMode: HighlightMode.NONE,

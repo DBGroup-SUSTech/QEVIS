@@ -197,9 +197,9 @@ function initEdges(app, dagData) {
     const newEdges = [];
     app.vertexes.forEach(src => {
         src.dstVertexes.forEach(dst => {
-            // if (dst == null){
-            //     console.log(src, dst, app.vertexes, app);
-            // }
+            if (dst == null){
+                console.log(src, dst, app.vertexes, app);
+            }
             const edgeId = src.vertexName + '-' + dst.vertexName;
             const type = edgeId2type.get(edgeId) ?? '@FAKE_EDGE';
             const newEdge = new Edge(src, dst, type);

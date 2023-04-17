@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,18 +28,10 @@ import java.util.*;
 @SpringBootTest
 public class Loader {
 
-    // You need to replace the placeholder `<project root>`.
-    public static final String DATA_PATH = "<project root>/data_process/data";
+    // You need to replace the placeholder `<project_root>`.
+    public static final String DATA_PATH = "<project_root>/data_process/data";
 
     private static final List<String> EXCLUSIVE_APPS = new LinkedList<>();
-    static {
-//        EXCLUSIVE_APPS.add("application_1616983634837_0023");
-//        EXCLUSIVE_APPS.add("application_1617019920149_0161");
-//        EXCLUSIVE_APPS.add("application_1635652147748_0016");
-//        EXCLUSIVE_APPS.add("application_1636380686626_0018");
-//        EXCLUSIVE_APPS.add("application_1636304334027_0004");
-//        EXCLUSIVE_APPS.add("application_1636380686626_0024");
-    }
 
     @Autowired
     ApplicationService applicationService;
@@ -56,6 +49,8 @@ public class Loader {
     EventService eventService;
     @Autowired
     DiagnoseService diagnoseService;
+    @Autowired
+    MapTransferService mapTransferService;
 
     @Test
     public void mainLoader() {
@@ -90,6 +85,7 @@ public class Loader {
         loadAllRecord();
         loadAllEvent();
         loadAllDiagnose();
+        loadAllMapTrans();
     }
 
     @Test
@@ -99,7 +95,7 @@ public class Loader {
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
         for (File f : files) {
             System.out.print("Load application " + f.getName());
             boolean success = loadApplication(f.getName());
@@ -110,12 +106,14 @@ public class Loader {
 
     @Test
     public void loadAllVertex() {
+        // Demo-Query11-0: Map 17 is null
+        // Demo-Query04-0: Map 24 is null
         final File dataDir = new File(DATA_PATH);
         File[] files = dataDir.listFiles((dir, name) -> new File(dir, name).isDirectory());
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
         for (File f : files) {
             System.out.print("Load vertex " + f.getName());
             boolean success = loadVertex(f.getName());
@@ -131,7 +129,7 @@ public class Loader {
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
         for (File f : files) {
             System.out.print("Load task " + f.getName());
             boolean success = loadTask(f.getName());
@@ -147,7 +145,7 @@ public class Loader {
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
         for (File f : files) {
             System.out.print("Load counter " + f.getName());
             boolean success = loadCounter(f.getName());
@@ -163,7 +161,7 @@ public class Loader {
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
         for (File f : files) {
             System.out.print("Load transfer " + f.getName());
             boolean success = loadTransfer(f.getName());
@@ -179,7 +177,7 @@ public class Loader {
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
         for (File f : files) {
             System.out.print("Load record " + f.getName());
             boolean success = loadRecord(f.getName());
@@ -195,7 +193,7 @@ public class Loader {
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
 //        boolean success = loadEvent(files[0].getName());
         for (File f : files) {
             System.out.print("Load event " + f.getName());
@@ -212,11 +210,27 @@ public class Loader {
         if (files == null) {
             return;
         }
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files);
 //        boolean success = loadDiagnose(files[0].getName());
         for (File f : files) {
             System.out.print("Load diagnose " + f.getName());
             boolean success = loadDiagnose(f.getName());
+            System.out.println(success ? " OK" : " failed");
+            System.gc();
+        }
+    }
+
+    @Test
+    public void loadAllMapTrans() {
+        final File dataDir = new File(DATA_PATH);
+        File[] files = dataDir.listFiles((dir, name) -> new File(dir, name).isDirectory());
+        if (files == null) {
+            return;
+        }
+        Arrays.sort(files);
+        for (File f : files) {
+            System.out.print("Load map transfer " + f.getName());
+            boolean success = loadMapTrans(f.getName());
             System.out.println(success ? " OK" : " failed");
             System.gc();
         }
@@ -227,9 +241,11 @@ public class Loader {
         final File infoFile = new File(Paths.get(DATA_PATH, name, "info.json").toString());
         Application.ApplicationBuilder applicationBuilder = Application.builder();
 
+        String appId;
+
         try {
             JsonNode node = new ObjectMapper().readTree(infoFile);
-            String appId = node.path("appId").asText();
+            appId = node.path("appId").asText();
             String database = node.path("database").asText();
 
             applicationBuilder
@@ -238,6 +254,13 @@ public class Loader {
 
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
+        }
+
+        // check whether this app is loaded
+        Application res = applicationService.getOne(new QueryWrapper<Application>().eq("app_id", appId), false);
+        if (res != null) {
+            System.out.print(". Application " + appId + " already exists. ");
             return false;
         }
 
@@ -341,6 +364,13 @@ public class Loader {
         }
         long referTime = Long.parseLong(app.getReferenceTime());
 
+        // check whether this app is loaded
+        long cnt = vertexService.count(new QueryWrapper<Vertex>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(". Vertices of application " + appId + " already loaded. ");
+            return false;
+        }
+
         List<Vertex> vertexes = new LinkedList<>();
 
         // load FullTask
@@ -397,6 +427,13 @@ public class Loader {
         }
         long referTime = Long.parseLong(app.getReferenceTime());
 
+        // check whether this app is loaded
+        long cnt = taskService.count(new QueryWrapper<Task>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(". Tasks of application " + appId + " already loaded. ");
+            return false;
+        }
+
         List<Vertex> vertexes = vertexService.list(new QueryWrapper<Vertex>().eq("aid", app.getAid()));
         Map<String, Integer> vidMap = new HashMap<>();
         vertexes.forEach(v -> vidMap.put(v.getVertexName(), v.getVid()));
@@ -445,6 +482,13 @@ public class Loader {
 
         Application app = applicationService.getOne(new QueryWrapper<Application>().eq("app_id", appId));
         if (app == null) {
+            return false;
+        }
+
+        // check whether this app is loaded
+        long cnt = counterService.count(new QueryWrapper<Counter>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(". Counters of application " + appId + " already loaded. ");
             return false;
         }
 
@@ -524,6 +568,13 @@ public class Loader {
             System.out.print(" Skip " + name + ". ");
             return false;
         }
+        // check whether this app is loaded
+        long cnt = transferService.count(new QueryWrapper<Transfer>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(". Transfers of application " + appId + " already loaded. ");
+            return false;
+        }
+
         long referTime = Long.parseLong(app.getReferenceTime());
         String taskIdPrefix = app.getTaskIdPrefix();
 
@@ -607,6 +658,10 @@ public class Loader {
                     delay = srcTask.getEndTime() > dstTask.getStartTime();
                 } else {
                     Vertex v = vMap.get(srcVtxName);
+                    if (v == null) {
+                        System.out.println("\nOne transfer ignored. src vertex " + srcVtxName + " is null.");
+                        continue;
+                    }
                     srcV = v.getVid();
                     delay = v.getEndTime() > dstTask.getStartTime();
                 }
@@ -657,6 +712,13 @@ public class Loader {
             return false;
         }
         long referTime = Long.parseLong(app.getReferenceTime());
+
+        // check whether this app is loaded
+        long cnt = recordService.count(new QueryWrapper<Record>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(" Records of application " + appId + " already loaded. ");
+            return false;
+        }
 
         List<Record> recordList = new LinkedList<>();
 
@@ -710,6 +772,13 @@ public class Loader {
         }
         long referTime = Long.parseLong(app.getReferenceTime());
         String taskIdPrefix = app.getTaskIdPrefix();
+
+        // check whether this app is loaded
+        long cnt = eventService.count(new QueryWrapper<Event>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(". Events of application " + appId + " already loaded. ");
+            return false;
+        }
 
         List<Task> tasks = taskService.list(new QueryWrapper<Task>().eq("aid", app.getAid()).select("task_id_suffix", "tid"));
         Map<String, Integer> tidMap = new HashMap<>();
@@ -806,6 +875,13 @@ public class Loader {
         }
         List<Diagnose> diagnoseList = new LinkedList<>();
 
+        // check whether this app is loaded
+        long cnt = diagnoseService.count(new QueryWrapper<Diagnose>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(". Diagnoses of application " + appId + " already loaded. ");
+            return false;
+        }
+
         // load diagnose file
         File diagnoseFile = new File(Paths.get(DATA_PATH, name, "output", "Diagnose.json").toString());
         try {
@@ -820,6 +896,69 @@ public class Loader {
         }
 
         diagnoseService.saveBatch(diagnoseList);
+        return true;
+    }
+
+    private boolean loadMapTrans(String name) {
+        final File infoFile = new File(Paths.get(DATA_PATH, name, "info.json").toString());
+        String appId;
+        try {
+            JsonNode node = new ObjectMapper().readTree(infoFile);
+            appId = node.path("appId").asText();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        Application app = applicationService.getOne(new QueryWrapper<Application>().eq("app_id", appId));
+        if (app == null) {
+            return false;
+        }
+        List<MapTransfer> mapTransList = new ArrayList<>();
+
+        // check whether this app is loaded
+        long cnt = mapTransferService.count(new QueryWrapper<MapTransfer>().eq("aid", app.getAid()));
+        if (cnt != 0) {
+            System.out.print(". Map trans of application " + appId + " already loaded. ");
+            return false;
+        }
+
+        // load map trans file
+        File mapFetchFile = new File(Paths.get(DATA_PATH, name, "output", "FullMapFetch.json").toString());
+        try {
+            JsonNode node = new ObjectMapper().readTree(mapFetchFile);
+            JsonNode mapFetch = node.get("changes");
+
+            Iterator<String> taskIdList = mapFetch.fieldNames();
+            while (taskIdList.hasNext()) {
+                String taskId = taskIdList.next();
+                String content = mapFetch.get(taskId).toString();
+
+                String taskIdSuffix = taskId.replace(app.getTaskIdPrefix(), "");
+                Task taskRecord = taskService.getOne(new QueryWrapper<Task>()
+                        .allEq(new HashMap<String, Object>(){{
+                            this.put("aid", app.getAid());
+                            this.put("task_id_suffix", taskIdSuffix);
+                        }}));
+                if (taskRecord == null) {
+                    System.out.println("Task with suffix " + taskIdSuffix + " not found. map fetch ignored");
+                    continue;
+                }
+                Integer tid = taskRecord.getTid();
+
+                mapTransList.add(MapTransfer.builder()
+                        .aid(app.getAid())
+                        .tid(tid)
+                        .content(content)
+                        .build());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        mapTransferService.saveBatch(mapTransList);
         return true;
     }
 }

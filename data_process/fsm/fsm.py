@@ -21,6 +21,8 @@ class FSM:
         # task_id -> end vertex input lst
         # represents vertex input of this task has been ended
         self.fetch_ends = {}
+        # task_id -> map fetches
+        self.task_to_map_fetches: Dict[str, List[Dict]] = {}
 
         self.to_compute_outlier = True
         self.outlier_changes = {}
@@ -37,6 +39,8 @@ class FSM:
         self.fetch_changes = []
         self.fetch_ends = {}
         self.fetch_incomplete_dict = {}
+
+        self.task_to_map_fetches = {}
 
     def set_compute_outlier(self, b: bool):
         self.to_compute_outlier = b
@@ -72,6 +76,15 @@ class FSM:
         incr_ret = {
             'changes': fetch_changes,
             'ends': fetch_ends
+        }
+        return incr_ret
+
+    def get_incr_map_fetch_data(self) -> dict:
+        with self.lock:
+            task_to_map_fetches = self.task_to_map_fetches
+            self.task_to_map_fetches = {}
+        incr_ret = {
+            'changes': task_to_map_fetches,
         }
         return incr_ret
 
@@ -112,7 +125,8 @@ class FSM:
 
             if 'VertexParallelism' in content or 'InputReader' in content:
                 pass    # do nothing
-            elif content.startswith('[Fetcher_') or 'All inputs fetched for input vertex' in content:
+            elif content.startswith('[Fetcher_') or 'All inputs fetched for input vertex' in content \
+                    or content.startswith('Processing split:'):
                 # record of fetching;
                 self._update_fetch(task_id, content, timestamp)
             elif 'TaskRunner2Result: TaskRunner2Result' in content:
@@ -247,9 +261,11 @@ class FSM:
             #     }
             #     self.fetch_changes[fetch_id] = data
             pass
+        
+        elif 'Ignoring finished or obsolete source' in content:
+            pass
 
-        else:
-            assert 'All inputs fetched' in content
+        elif 'All inputs fetched' in content:
             src_vertex = content.split('for input vertex : ')[1].strip()        # all input from this vertex ended
             if dst_task_id in self.fetch_ends:
                 self.fetch_ends[dst_task_id].append(src_vertex)
@@ -267,6 +283,15 @@ class FSM:
                     'endTime': timestamp,
                 }
                 self.fetch_changes.append(data)
+
+        elif 'Processing split:' in content:
+            # fetch data from hdfs (only for map)
+            map_fetch = self._parse_map_fetch(content)
+            map_fetch['timestamp'] = timestamp
+            self.task_to_map_fetches.setdefault(dst_task_id, []).append(map_fetch)
+        
+        else:
+            print('Parse fetch record failed. Ignored. Content:', content)
 
     def _update_run_result(self, task_id, content):
         result = re.match(r'.*TaskRunner2Result: TaskRunner2Result\{(.*)\}', content).group(1).strip()
@@ -306,6 +331,27 @@ class FSM:
         # ]
         # return {name: (counters[name] if name in counters else None) for name in target_names}
         return counters
+
+    def _parse_map_fetch(self, content):
+        """
+        content example:
+        2022-10-07 05:30:45,683 [INFO] [TezChild] |lib.MRReaderMapred|: Processing split: TezGroupedSplit{wrappedSplits=[org.apache.hadoop.mapred.TextInputFormat:hdfs://dbg03:9000/tmp/tpcds-generate/100/catalog_sales/data-m-00045:0+134217728, org.apache.hadoop.mapred.TextInputFormat:hdfs://dbg03:9000/tmp/tpcds-generate/100/catalog_sales/data-m-00045:134217728+134217728], wrappedInputFormatName='org.apache.hadoop.hive.ql.io.HiveInputFormat', locations=[dbg07], rack='null', length=268435456}
+        """
+        # we don't store block names for now
+        # extract list of split data from wrappedSplits
+        # split_data = content.split('wrappedSplits=[', 1)[1].split('], wrappedInputFormatName=', 1)[0].split(', ')
+        # clean up split data, and get split description like catalog_sales/data-m-00045:0+134217728
+        # blocks = [re.match(r'.*/(.+/data-m-.+)$', s).group(1).strip() for s in split_data]
+
+        # extract list locations
+        locations = content.split('locations=[', 1)[1].split('], rack=', 1)[0].split(', ')
+        # extract length
+        length = int(content.split('length=', 1)[1].split('}', 1)[0])
+        return {
+            # 'blocks': blocks,
+            'locations': locations,
+            'length': length,
+        }
 
     def _compute_outlier(self, vtx_name):
         tasks = self.tasks_dict[vtx_name]

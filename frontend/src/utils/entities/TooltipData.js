@@ -43,7 +43,11 @@ export class TooltipData {
 
             return {key, value};
         });
-
+        if (task.vertex.type === 'Map'){
+            if (task.mapTrans[0])
+                this.counterItems["dataSource"] = task.mapTrans[0].machine??"None"
+            // console.log(task)
+        }
         const indexOffset = task.vertex.type === 'Map' ? 0 : 5;
         this.steps = [];
         for (let i = 0; i < 5; i++) {

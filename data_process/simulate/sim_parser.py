@@ -1,3 +1,4 @@
+import argparse
 import time
 import json
 import os
@@ -26,7 +27,8 @@ def is_useful_line(line: str) -> bool:
                and 'MemtoDiskMerger' not in line) \
            or 'Final Counters for attempt' in line \
            or 'All inputs fetched' in line \
-           or 'TaskRunner2Result: TaskRunner2Result' in line
+           or 'TaskRunner2Result: TaskRunner2Result' in line \
+           or '[TezChild] |lib.MRReaderMapred|: Processing split:' in line
 
 
 def parse_machine_line(line: str):
@@ -56,6 +58,8 @@ def parse_info_part(line: str):
         return line.split(' Profiling: Tez ')[1].strip()
     elif '@FAKE' in line:
         return line
+    elif '[TezChild] |lib.MRReaderMapred|: Processing split:' in line:
+        return line.split('[TezChild] |lib.MRReaderMapred|: ')[1].strip()
     else:
         match = re.match(r'.*] (\[.*]) .*\|:(.*)', line)
         fetcher = match.group(1).strip()
@@ -188,15 +192,19 @@ def generate_sim_file(input_path, output_path):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Extract simulator files")
+    parser.add_argument('-d', '--dataset', type=str, required=True)
+    args = parser.parse_args()
 
-    DATA_SET = 'data'
+    dataset = args.dataset
 
     def gen_batch():
-        names = list(os.listdir(os.path.join(ROOT_PATH, DATA_SET)))
+        names = list(os.listdir(os.path.join(ROOT_PATH, dataset)))
         for name in names:
+            print('process sim file', name)
             start_time = time.time()
 
-            example_path = os.path.join(ROOT_PATH, f'{DATA_SET}/{name}')
+            example_path = os.path.join(ROOT_PATH, f'{dataset}/{name}')
             log_file_name = list(filter(lambda path: '.log' in path, os.listdir(example_path)))[0]
             log_path = os.path.join(example_path, log_file_name)
 
@@ -205,6 +213,9 @@ if __name__ == '__main__':
                 os.mkdir(output_path)
 
             sim_path = os.path.join(example_path, 'output', 'SimulationFile.json')
+            if os.path.exists(sim_path):
+                print(f'not to generate {name}: sim file exists')
+                continue
 
             generate_sim_file(log_path, sim_path)
             print(f'generate {name} done in {round(time.time() - start_time, 3)} s')

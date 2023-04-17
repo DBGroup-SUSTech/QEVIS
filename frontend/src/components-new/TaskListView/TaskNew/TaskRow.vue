@@ -11,20 +11,34 @@
               ref="taskLabel"
               @mouseenter="enterTaskLabel"
               @mouseleave="leaveTaskLabel">{{applyEllipsis(task.suffix)}}</text>
-        <g :transform="'translate(' + [taskDurationX,0] + ')'">
+        <g v-if="initDone" :transform="'translate(' + [taskDurationX,0] + ')'">
             <DurationBar v-if="contextType === 'Duration'" :height="task.config.unitHeight" :width="durationLength" :strokeColor="strokeColor"
                          :start="task.start" :end="task.end" :barHeight="machineSize" :timeScale="timeScale"
+                         :appendCtxType="appendCtxType"
+                         :app="app"
+                         :isRenderColor="isRenderColor"
             ></DurationBar>
+            <DataLayoutBar v-else-if="contextType === 'DataLayout'"
+                           :tScale="dataLayoutScale"
+                           :dataList="machineDataSize"
+                           :height="task.config.unitHeight" :width="durationLength" :barHeight="machineSize" :marginLR="10"
+                           :is-task-level="isSameMachine"
+            ></DataLayoutBar>
             <DensityBar v-else-if="contextType === 'TimeUsage'"
                         :tScale="tScale"
                         :height="task.config.unitHeight" :width="durationLength" :barHeight="machineSize" :marginLR="10"
                         :val="task.end - task.start"
+                        :appendCtxType="appendCtxType"
+                        :app="app"
+                        :isRenderColor="isRenderColor"
             ></DensityBar>
-
             <DensityBar v-else-if="metricScale !== undefined"
                         :tScale="metricScale[contextType]"
                         :height="task.config.unitHeight" :width="durationLength" :barHeight="machineSize" :marginLR="10"
                         :val="dataInfo[contextType]"
+                        :appendCtxType="appendCtxType"
+                        :app="app"
+                        :isRenderColor="isRenderColor"
             ></DensityBar>
 
             <PercBar v-if="false"
@@ -44,14 +58,15 @@ import PercBar from "@/components-new/TaskListView/TaskNew/subcomponents/PercBar
 import DensityBar from "@/components-new/TaskListView/TaskNew/subcomponents/DensityBar";
 import {HighlightMode} from "@/utils/const/HightlightMode";
 import {mapState} from "vuex";
+import DataLayoutBar from "@/components-new/TaskListView/TaskNew/subcomponents/DataLayoutBar";
 export default {
     name: "TaskRow",
     props: ['app', 'widthRatio', 'task', 'width', 'columns', 'headLength', 'taskCountLength',
         'index', 'brothers', 'cellWidth', 'timeScale', 'taskNum', 'durationLength',
         'maxDuration', 'headConfig', 'strokeColor', 'textMarginY', 'srcNestMap', 'dstNestMap',
-        'dataInfo', 'dataSummary', 'contextType' ,'tScale', 'metricScale'
+        'dataInfo', 'dataSummary', 'contextType' ,'tScale', 'metricScale','dataLayoutScale','appendCtxType','outlierTasksIds','outlierBound'
     ],
-    components:{DurationBar, PercBar, DensityBar },
+    components:{DataLayoutBar, DurationBar, PercBar, DensityBar },
     data(){
         return {
             taskStart: 0,
@@ -65,7 +80,15 @@ export default {
             dstList: [], // 下游任务
             renderComponent: true,
 
-            // height: 0
+            // dataLayoutScale:undefined,
+            dataLayoutLenList:[],
+            machineDataSize: {},
+            initDone: false,
+            isSameMachine: false,
+            isRenderColor: false,
+            outlierTasksId:undefined
+            // isRenderColor:false
+          // height: 0
         }
     },
     mounted(){
@@ -81,7 +104,7 @@ export default {
         //
         // this.taskCountX = this.cellWidth
         // this.taskDurationX = this.cellWidth + this.taskCountLength
-        // this.taskLength = this.width - this.taskDurationX
+        this.taskLength = this.width - this.taskDurationX
 
         // console.log('dataSummary', this.dataSummary)
         // console.log('taskInfo', this.dataInfo)
@@ -92,6 +115,29 @@ export default {
         //     this.data.origin.layout.selectCurrent = false
         // })
 
+        let machineDataSize = this.machineDataSize
+        // let totalSum = 0
+        this.task.mapTrans.forEach(item => {
+            let src = item.machine
+            if (!machineDataSize[src]){
+              machineDataSize[src] = 0
+            }
+            machineDataSize[src] += item.length
+            // totalSum += item.length
+          })
+        // this.dataLayoutScale = d3.scaleLinear().domain([0, totalSum]).range([0, this.taskLength])
+      if(this.task.mapTrans.length > 0){
+        this.isSameMachine = this.task.mapTrans[0].machine !== this.task.machine.machineName
+      }
+      // this.renderColoUpt()
+      this.outlierTasksId = new Set()
+      if (this.contextType !== "Duration"){
+          this.outlierTasksIds[this.contextType].forEach(item => {
+            this.outlierTasksId.add(item["taskId"])
+          })
+      }
+      this.isRenderColor = this.appendCtxType === "DataLayout" && this.task.mapTrans.length > 0 && this.task.mapTrans[0].machine !== this.task.machine.machineName && this.outlierTasksId.has(this.task.tid)
+      this.initDone = true
     },
     methods: {
         mouseover() {
@@ -161,6 +207,33 @@ export default {
             // console.log('machine totalHeight update ', this.totalHeight)
             // this.data.config.height = this.totalHeight + this.data.config.unitHeight
         },
+        appendCtxType(){
+          this.isRenderColor = this.appendCtxType === "DataLayout" && this.task.mapTrans.length > 0 && this.task.mapTrans[0].machine !== this.task.machine.machineName && this.outlierTasksId.has(this.task.tid)
+        },
+        contextType(){
+          if (this.contextType !== "Duration"){
+            this.initDone = false
+            // console.log(this.outlierTasksIds[this.contextType])
+            this.outlierTasksId = new Set()
+            this.outlierTasksIds[this.contextType].forEach(item => {
+              this.outlierTasksId.add(item["taskId"])
+            })
+            this.isRenderColor = this.appendCtxType === "DataLayout" && this.task.mapTrans.length > 0 && this.task.mapTrans[0].machine !== this.task.machine.machineName && this.outlierTasksId.has(this.task.tid)
+            // console.log(this.outlierTasksId,this.isRenderColor)
+            this.initDone = true
+          }
+        },
+        outlierBound(){
+          this.initDone = false
+          // console.log(this.outlierTasksIds[this.contextType])
+          this.outlierTasksId = new Set()
+          this.outlierTasksIds[this.contextType].forEach(item => {
+            this.outlierTasksId.add(item["taskId"])
+          })
+          this.isRenderColor = this.appendCtxType === "DataLayout" && this.task.mapTrans.length > 0 && this.task.mapTrans[0].machine !== this.task.machine.machineName && this.outlierTasksId.has(this.task.tid)
+          // console.log(this.outlierTasksId,this.isRenderColor)
+          this.initDone = true
+        }
     },
     computed: {
         ...mapState('comparison', {
@@ -169,6 +242,17 @@ export default {
         outerSelect() {
             return this.task.config.outerSelect;
         },
+        // isRenderColor(){
+        //   return this.appendCtxType === "DataLayout" && this.task.mapTrans.length > 0
+        //       && this.task.mapTrans[0].machine !== this.task.machine.machineName && this.outlierTasksId.has(this.task.tid)
+        // },
+        // outlierTasksId (){
+        //   let outlier_ids = new Set()
+        //   this.outlierTasksIds[this.contextType].forEach(item => {
+        //     outlier_ids.add(item["taskId"])
+        //   })
+        //   return outlier_ids
+        // },
         currentStroke(){
             if (this.task.interact.highlightMode !== HighlightMode.NONE) {
                 switch (this.task.interact.highlightMode) {

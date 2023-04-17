@@ -8,6 +8,7 @@ import com.dbgroup.qevis.vo.AidVO;
 import com.dbgroup.qevis.vo.GetApplicationListVO;
 import com.dbgroup.qevis.vo.TimeIntervalQueryVO;
 import com.dbgroup.qevis.vo.TransferVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -42,8 +43,9 @@ public class ApplicationController {
     private final EventService eventService;
     private final DiagnoseService diagnoseService;
     private final CounterService counterService;
+    private final MapTransferService mapTransferService;
 
-    public ApplicationController(ApplicationService applicationService, VertexService vertexService, TaskService taskService, RecordService recordService, TransferService transferService, EventService eventService, DiagnoseService diagnoseService, CounterService counterService) {
+    public ApplicationController(ApplicationService applicationService, VertexService vertexService, TaskService taskService, RecordService recordService, TransferService transferService, EventService eventService, DiagnoseService diagnoseService, CounterService counterService, MapTransferService mapTransferService) {
         this.applicationService = applicationService;
         this.vertexService = vertexService;
         this.taskService = taskService;
@@ -52,6 +54,7 @@ public class ApplicationController {
         this.eventService = eventService;
         this.diagnoseService = diagnoseService;
         this.counterService = counterService;
+        this.mapTransferService = mapTransferService;
     }
 
     @RequestMapping(value = "/app-meta-list", method = RequestMethod.POST)
@@ -234,6 +237,11 @@ public class ApplicationController {
 //                        "start_time as start", "end_time as end");
 //        List<Map<String, Object>> transferList = transferService.listMaps(qw2);
 //        resultMap.put("transfer", transferList);
+
+        QueryWrapper<MapTransfer> qw3 = new QueryWrapper<MapTransfer>()
+                .eq("aid", aid);
+        List<Map<String, Object>> mapTransferList = mapTransferService.listMaps(qw3);
+        resultMap.put("map_trans", mapTransferList);
 
         return resultMap;
     }

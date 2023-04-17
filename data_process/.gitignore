@@ -259,6 +259,7 @@ pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,python,venv
 
+data
 !.gitignore
 .idea
 data_local
@@ -266,3 +267,6 @@ data2
 data3
 data3_outliers
 data4
+data5
+figure_data
+tdag_data

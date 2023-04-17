@@ -39,8 +39,8 @@ export const MainObjectName = {
 }
 
 /* config */
-const POINT_SIZE = 10;
-const TRANSFER_SIZE = 10;
+const POINT_SIZE = 7;
+const TRANSFER_SIZE = 7;
 const RAYCASTER_THRESHOLD = 7;
 
 export class TaskMatrixSystem {

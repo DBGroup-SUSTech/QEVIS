@@ -6,25 +6,25 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     name: defaultDataSource
 
-    # You need to replace the placeholder `<your_ip>` and `<your_port>`.
+    # You need to replace the placeholder `<your_ip>` and `<your_port>` (3306 by default).
     url: jdbc:mysql://<your_ip>:<your_port>/qevis_db?serverTimezone=UTC&rewriteBatchedStatements=true
     username: qevis_user
     password: qevis_pwd
 
     druid:
-      initialSize: 5
-      minIdle: 5
-      maxActive: 20
-      maxWait: 60000
+      initialSize: 5 
+      minIdle: 5 
+      maxActive: 20 
+      maxWait: 60000 
       timeBetweenEvictionRunsMillis: 60000
       minEvictableIdleTimeMillis: 300000
       validationQuery: SELECT 1
       testWhileIdle: true
       testOnBorrow: true
       testOnReturn: false
-      poolPreparedStatements: true
+      poolPreparedStatements: true 
       maxPoolPreparedStatementPerConnectionSize: 20
-      filters: stat,wall
+      filters: stat,wall 
       use-global-data-source-stat: true
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
 

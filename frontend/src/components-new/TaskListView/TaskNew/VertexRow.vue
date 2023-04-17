@@ -25,16 +25,26 @@
                     ></PercBar>
                 </g>
                 <g :transform="'translate(' + [taskDurationX, 0] + ')'">
-                    <DurationBar v-if="contextType=='Duration'" :height="vertex.config.unitHeight" :width="taskLength" :strokeColor="strokeColor"
+                    <DurationBar v-if="contextType==='Duration'" :height="vertex.config.unitHeight" :width="taskLength" :strokeColor="strokeColor"
                                  :start="vertexStart" :end="vertexEnd" :barHeight="machineSize" :timeScale="timeScale"
                     ></DurationBar>
-
+                    <DataLayoutBar v-else-if="contextType === 'DataLayout'"
+                                   :tScale="dataLayoutScale"
+                                   :dataList="machineDataSize"
+                                   :height="vertex.config.unitHeight" :width="taskLength" :barHeight="machineSize" :marginLR="10"
+                    ></DataLayoutBar>
                     <DensityBar v-else-if="contextType === 'TimeUsage'"
                                 :tScale="tScale"
                                 :dataList="timeUsageList"
                                 :height="vertex.config.unitHeight" :width="taskLength" :barHeight="machineSize" :marginLR="10"
+                                :appendCtxType="appendCtxType"
+                                :colorList="colorList"
+                                :isRenderColor="isRenderColor"
+                                :sortedDataList="metricSortedSet['TimeUsage']"
+                                :isShowOutlier="isShowOutlier"
+                                :outlierNum="targetOutlierTasksNum"
+                                :contextType = "contextType"
                     ></DensityBar>
-
                     <!--                &lt;!&ndash;                <PercBar v-else&ndash;&gt;-->
                     <!--                &lt;!&ndash;                         :height="vertex.config.unitHeight" :width="taskLength" :barHeight="machineSize" :marginLR="10"&ndash;&gt;-->
                     <!--                &lt;!&ndash;                         :maxVal="dataSummary[contextType][1]" :val="dataSummary[contextType][0]"&ndash;&gt;-->
@@ -45,9 +55,14 @@
                                 :tScale="metricScale[contextType]"
                                 :dataList="metricSet[contextType]"
                                 :height="vertex.config.unitHeight" :width="taskLength" :barHeight="machineSize" :marginLR="10"
+                                :appendCtxType="appendCtxType"
+                                :colorList="colorList"
+                                :isRenderColor="isRenderColor"
+                                :sortedDataList="metricSortedSet[contextType]"
+                                :isShowOutlier="isShowOutlier"
+                                :outlierNum="targetOutlierTasksNum"
+                                :contextType = "contextType"
                     ></DensityBar>
-
-
                 </g>
             </g>
         </g>
@@ -93,6 +108,11 @@
                             :tScale="tScale"
                             :metricScale="metricScale"
                             :vertexHover="vertexHover"
+                            :dataLayoutScale="dataLayoutScale"
+                            :appendCtxType="appendCtxType"
+                            :metricSortedSet="metricSortedSet"
+                            :targetOutlierTasksNum="targetOutlierTasksNum"
+                            :outlierBound="outlierBound"
                 ></MachineRow>
             </g>
         </g>
@@ -108,6 +128,7 @@ import DurationBar from "@/components-new/TaskListView/TaskNew/subcomponents/Dur
 import DensityBar from "@/components-new/TaskListView/TaskNew/subcomponents/DensityBar";
 import {HighlightMode} from "@/utils/const/HightlightMode";
 import {mapState} from "vuex";
+import DataLayoutBar from "@/components-new/TaskListView/TaskNew/subcomponents/DataLayoutBar";
 // import Row from "./Row"
 
 
@@ -119,7 +140,7 @@ export default {
         'vertex',   // VertexTreeModel
         'width', 'columns', 'index', 'brothers', 'timeScale',
         'start', 'end', 'machineNames', 'maxDuration', 'headConfig', 'taskNum',
-        'srcNestMap', 'dstNestMap', 'contextType'],
+        'srcNestMap', 'dstNestMap', 'contextType', 'dataLayoutTasks','appendCtxType','outlierBound'],
     data() {
         return {
             cellWidth: 0,
@@ -143,17 +164,28 @@ export default {
             taskCountLength: 0,
 
             timeUsageList: [],
+            colorList: [],
+            dataLayoutLenList:[],
+            machineDataSize: {},
+
             tScale: undefined,
+            dataLayoutScale:undefined,
             renderComponent: true,
             dataSummary: undefined,
 
+            dataScale: undefined,
             metricScale: undefined,
             metricSet: undefined,
-
             vertexHover: false,
+
+            metricSortedSet: undefined,
+            targetOutlierTasksNum: 0,
+            outlierColorList:[],
+            isShowOutlier: true
         }
     },
     components:{
+      DataLayoutBar,
         VertexView,
         MachineRow,
         PercBar,
@@ -177,10 +209,42 @@ export default {
         this.textMarginY = offsetY
 
         this.machineSize = this.vertex.config.unitHeight - this.marginY * 2 - 4 * 2
+        // console.log(this.vertex)
+        let machineDataSize = this.machineDataSize
+        let totalSum = 0
+        this.vertex.tasks.forEach(t => {
+          t.mapTrans.forEach(item => {
+            let src = item.machine
+            if (!machineDataSize[src]){
+              machineDataSize[src] = 0
+            }
+            machineDataSize[src] += item.length
+            totalSum += item.length
+          })
+        })
+        this.dataLayoutScale = d3.scaleLinear().domain([0, totalSum]).range([0, this.taskLength])
+
+        this.metricSortedSet = {}
+        let tmp = [], idx = 0
         this.vertex.machineTreeModelList.forEach(machine=>{
-            machine.taskTreeModelList.forEach(task=>[
-                this.timeUsageList.push(task.end - task.start)
-            ])
+            machine.taskTreeModelList.forEach(task=>{
+              this.timeUsageList.push(task.end - task.start)
+              tmp.push({"value":task.end - task.start, "taskId": task.tid, 'listIdx': idx})
+              idx = idx + 1
+              let c = 'black'
+              if (task.vertex.type === 'Map'){
+                if (task.mapTrans[0]){
+                  if (task.mapTrans[0].machine && machine.machineName !==task.mapTrans[0].machine){
+                    c = 'red'
+                  }
+                }
+              }
+              this.colorList.push(c)
+            })
+            tmp.sort((a, b) => (a.value > b.value)? 1 : -1)
+            this.metricSortedSet["TimeUsage"] = tmp
+                // this.dataLayoutLenList.push(task.)
+            // ])
         })
         this.tScale = d3.scaleLinear().domain(d3.extent(this.timeUsageList)).range([0, this.taskLength])
 
@@ -191,21 +255,34 @@ export default {
         //     this.dataSummary[key] = [d3.min(this.data.values, machine => d3.min(machine.taskList, task=>this.counters[task.task_id][key])),
         //         d3.max(this.data.values, machine => d3.max(machine.taskList, task=>this.counters[task.task_id][key]))]
         // })
-
+        // let machineTasks = {}
+        // this.dataLayoutTasks.forEach(item =>{
+        //
+        // })
         this.metricSet = {}
         this.metricScale = {}
+        // this.targetOutlierTasksSet = {}
+        // let totalSize = 0
         this.app.counterKeys.forEach(key=>{
             const metric = []
+            let metricOutlierTasks = [], idx = 0
             this.metricSet[key] = metric
             this.vertex.tasks.forEach(task => {
                 if (key in task.counter) {
                     metric.push(task.counter[key])
+                    metricOutlierTasks.push({"value": task.counter[key], "taskId":task.tid, 'listIdx':idx})
+                    idx += 1
                 }
             })
+            // d3.sort
+            metricOutlierTasks.sort((a,b)=>(a.value > b.value) ? 1 : -1)
+            this.metricSortedSet[key] = metricOutlierTasks
             this.metricScale[key] = d3.scaleLinear()
                     .domain([0, d3.max(metric) ?? 0])
                     .range([0, this.taskLength])
         })
+        this.targetOutlierTasksNum = Math.ceil(this.vertex.tasks.length * this.outlierBound)
+        // console.log(this.metricSortedSet)
     },
     methods: {
         sum(arr) {
@@ -278,11 +355,18 @@ export default {
                 this.clickExtend();
             }
         },
+        outlierBound(){
+          // console.log(this.outlierBound, Math.ceil(this.vertex.tasks.length * (1 - this.outlierBound)))
+          this.targetOutlierTasksNum = Math.ceil(this.vertex.tasks.length * (1 - this.outlierBound))
+        }
     },
     computed: {
         ...mapState('comparison', {
             colorSchema: state => state.colorSchema,
         }),
+        isRenderColor(){
+          return this.appendCtxType === "DataLayout"
+        },
         outerSelect() {
             return this.vertex.config.outerSelect;
         },

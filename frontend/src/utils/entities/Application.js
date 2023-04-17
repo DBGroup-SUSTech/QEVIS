@@ -222,6 +222,7 @@ export class Application {
     dagDiagramCollapse = true
 
     // tdagTransform = null
+    appendCtxType = "Nothing"
 
     constructor() {
         this.xScale = d3.scaleLinear().range([LayoutConfig.marginLeft, LayoutConfig.width - LayoutConfig.marginRight]);

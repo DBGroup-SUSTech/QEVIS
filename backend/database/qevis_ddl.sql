@@ -1,7 +1,7 @@
-create table if not exists application
+create table application
 (
     aid            int auto_increment
-primary key,
+        primary key,
     app_id         char(30)                            null,
     database_name  varchar(50)                         null,
     query_name     varchar(50)                         null,
@@ -19,10 +19,10 @@ primary key,
     task_id_prefix varchar(30)                         null
 );
 
-create table if not exists counter
+create table counter
 (
     cid                       int auto_increment
-primary key,
+        primary key,
     aid                       int        null,
     tid                       int        null,
     file_bytes_read           mediumtext null,
@@ -40,22 +40,22 @@ primary key,
 );
 
 create index counter_aid_tid_idx
-on counter (aid, tid);
+    on counter (aid, tid);
 
-create table if not exists diagnose
+create table diagnose
 (
     did     int auto_increment
-primary key,
+        primary key,
     aid     int        null,
     content mediumtext null,
     constraint diagnose_aid_fk
-foreign key (aid) references application (aid)
+        foreign key (aid) references application (aid)
 );
 
-create table if not exists event
+create table event
 (
     eid       int auto_increment
-primary key,
+        primary key,
     aid       int     null,
     tid       int     null,
     timestamp int     null,
@@ -63,15 +63,15 @@ primary key,
 );
 
 create index event_aid_tid_type_timestamp_idx
-on event (aid, tid, type, timestamp);
+    on event (aid, tid, type, timestamp);
 
 create index event_aid_timestamp_idx
-on event (aid, timestamp);
+    on event (aid, timestamp);
 
-create table if not exists record
+create table record
 (
     rid       int auto_increment
-primary key,
+        primary key,
     aid       int         null,
     timestamp int         null,
     machine   varchar(10) null,
@@ -79,12 +79,12 @@ primary key,
 );
 
 create index record_aid_timestamp_idx
-on record (aid, timestamp);
+    on record (aid, timestamp);
 
-create table if not exists task
+create table task
 (
     tid            int auto_increment
-primary key,
+        primary key,
     aid            int                  null,
     vid            int                  null,
     task_id_suffix char(16)             null,
@@ -94,20 +94,36 @@ primary key,
     fail           tinyint(1) default 0 null
 );
 
-create index task_aid_start_time_idx
-on task (aid, start_time);
+create table map_transfer
+(
+    m_tran_id int auto_increment
+        primary key,
+    aid       int  null,
+    tid       int  null,
+    content   text null,
+    constraint map_transfer_aid_fk
+        foreign key (aid) references application (aid),
+    constraint map_transfer_tid_fk
+        foreign key (tid) references task (tid)
+);
 
-create table if not exists test_table
+create index map_transfer_aid_tid_idx
+    on map_transfer (aid, tid);
+
+create index task_aid_start_time_idx
+    on task (aid, start_time);
+
+create table test_table
 (
     id  int auto_increment
-primary key,
+        primary key,
     str varchar(100) null
 );
 
-create table if not exists transfer
+create table transfer
 (
     tran_id    int auto_increment
-primary key,
+        primary key,
     aid        int         null,
     src        int         null,
     src_v      int         null,
@@ -121,18 +137,18 @@ primary key,
 );
 
 create index transfer_aid_delay_end_time_idx
-on transfer (aid, delay, end_time);
+    on transfer (aid, delay, end_time);
 
-create table if not exists vertex
+create table vertex
 (
     vid         int auto_increment
-primary key,
+        primary key,
     aid         int         null,
     vertex_name varchar(50) null,
     start_time  int         null,
     end_time    int         null,
     type        varchar(15) null,
     constraint vertex_aid_fk
-foreign key (aid) references application (aid)
+        foreign key (aid) references application (aid)
 );
 

@@ -27,10 +27,10 @@
                                              @click.native="clickCollapseIcon(app)"/>
                                     <el-icon class="el-icon-caret-right" v-show="app.dagDiagramCollapse"
                                              @click.native="clickCollapseIcon(app)"/>
+<!--                                    <span style="font-size: 1em; margin-left: 5px;">{{ index + ' ' + app.queryName }}</span>-->
                                     <span style="font-size: 1em; margin-left: 5px;">{{ index + ' ' + app.queryName }}</span>
 
-
-                                    <el-icon v-if="index <= -1" class="el-icon-loading mini-icon"
+                                    <el-icon v-if="index <=1" class="el-icon-loading mini-icon"
                                              style="margin-left: auto"/>
                                     <el-icon v-else class="el-icon-finished mini-icon" style="margin-left: auto"/>
 
@@ -166,6 +166,9 @@
                 } ">
             <div class="tooltip-text" style="font-weight: bold;">
                 Task details
+            </div>
+            <div class="tooltip-text" style="margin-left: 10px;">
+              {{"DataSource" + ': ' + tooltipData.counterItems["dataSource"]}}
             </div>
             <div v-for="(item, i) in tooltipData.counterItems" :key="'counter' + i"
                  class="tooltip-text" style="margin-left: 10px;">

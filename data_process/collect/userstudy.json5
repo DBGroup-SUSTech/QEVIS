@@ -1,0 +1,39 @@
+{
+  hosts: [
+    "dbg02",
+    "dbg03",
+    "dbg04",
+//    "dbg05",
+    "dbg07",
+    "dbg08",
+    "dbg09",
+    "dbg10"
+  ],
+  tasks: [
+    {
+      query_name: "Normal-Query17-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query17.sql",
+      database: "tpcds_50"
+    },
+    {
+      query_name: "Normal-Query29-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query29.sql",
+      database: "tpcds_50"
+    },
+    {
+      query_name: "Normal-Query49-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query49.sql",
+      database: "tpcds_50"
+    },
+    {
+      query_name: "Normal-Query54-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query54.sql",
+      database: "tpcds_50"
+    },
+    {
+      query_name: "Normal-Query60-0",
+      query_path: "/home/zhengxin/env/GHiveUtils/hive-testbench/sample-queries-tpcds/query60.sql",
+      database: "tpcds_50"
+    },
+  ]
+}

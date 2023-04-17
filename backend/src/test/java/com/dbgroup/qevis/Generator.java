@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Generator {
 
-    private static final String url = "jdbc:mysql://10.20.96.60:3306/qevis_db?serverTimezone=UTC";
+    private static final String url = "jdbc:mysql://10.16.71.4:3306/qevis_db?serverTimezone=UTC";
     private static final String username = "qevis";
     private static final String password = "qevis";
 
@@ -25,6 +25,7 @@ public class Generator {
 //        this.add("record");
 //        this.add("event");
 //        this.add("diagnose");
+//        this.add("map_transfer");
     }};
 
     public static void main(String[] args) {
