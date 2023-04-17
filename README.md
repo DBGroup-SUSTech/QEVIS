@@ -21,13 +21,13 @@ To run this demo system with provided data, you need:
 ### Step 1: Prepare data
 Due to the size limit, in this repository we only provide 10 representative sample data from the real employment environment.
 
-Data is zipped and locates at `<project_root>/data_process/data`. Unzip these 10 files you will get 10 folders. **After that, 10 `.zip` files should be removed from `data` folder.**
+Data is zipped and locates at `<project_root>/data_process/zipped_data`. Unzip all data by executing commands
 ```shell
-unzip '*.zip'
-rm *.zip
+chmod 777 ./unzip_data.sh
+./unzip_data.sh
 ```
 
-Each folder contains:
+Then you will get a new folder `data` which contains 10 folders. Each folder contains:
 - A log file collected from Hive application execution
 - An input SQL text
 - A physical execution plan for input SQL
