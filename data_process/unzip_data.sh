@@ -5,7 +5,8 @@ echo "====== unzip data ======"
 mkdir -p ./data
 
 for file in ./zipped_data/*.tar.gz; do
-    tar -xzf "$file" -C ./data
+  echo "unzip $file to ./data"
+  tar -xzf "$file" -C ./data
 done
 
 echo "====== unzip data done ======"
