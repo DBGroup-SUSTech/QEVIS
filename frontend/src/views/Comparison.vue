@@ -28,7 +28,7 @@
                                     <el-icon class="el-icon-caret-right" v-show="app.dagDiagramCollapse"
                                              @click.native="clickCollapseIcon(app)"/>
 <!--                                    <span style="font-size: 1em; margin-left: 5px;">{{ index + ' ' + app.queryName }}</span>-->
-                                    <span style="font-size: 1em; margin-left: 5px;">{{ index + ' ' + app.queryName }}</span>
+                                    <span style="font-size: 1em; margin-left: 5px;">{{ app.queryName }}</span>
 
                                     <el-icon v-if="index <=1" class="el-icon-loading mini-icon"
                                              style="margin-left: auto"/>
