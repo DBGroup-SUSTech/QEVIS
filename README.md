@@ -19,9 +19,13 @@ To run this demo system with provided data, you need:
 - MySQL 5.7
 
 ### Step 1: Prepare data
-Due to the size limit, in this repository we only provide 5 representative sample data from the real employment environment.
+Due to the size limit, in this repository we only provide 10 representative sample data from the real employment environment.
 
-Data is zipped and locates at `<project_root>/data_process/data`. Unzip these 5 files you will get 5 folders. **After that, 5 `.zip` files should be removed from `data` folder.**
+Data is zipped and locates at `<project_root>/data_process/data`. Unzip these 10 files you will get 10 folders. **After that, 10 `.zip` files should be removed from `data` folder.**
+```shell
+unzip '*.zip'
+rm *.zip
+```
 
 Each folder contains:
 - A log file collected from Hive application execution
