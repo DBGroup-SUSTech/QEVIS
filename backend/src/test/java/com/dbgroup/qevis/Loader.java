@@ -247,10 +247,12 @@ public class Loader {
             JsonNode node = new ObjectMapper().readTree(infoFile);
             appId = node.path("appId").asText();
             String database = node.path("database").asText();
+            String queryName = node.path("queryName").asText();
 
             applicationBuilder
                     .appId(appId)
-                    .databaseName(database);
+                    .databaseName(database)
+                    .queryName(queryName);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -269,9 +271,6 @@ public class Loader {
         List<File> sqlFileList = (List<File>) FileUtils.listFiles(baseDir, new String[]{"sql"}, false);
         if (!sqlFileList.isEmpty()) {
             File sqlFile = sqlFileList.get(0);
-            String queryName = sqlFile.getName().replace(".sql", "");
-            applicationBuilder.queryName(queryName);
-
             try {
                 String queryString = FileUtils.readFileToString(sqlFile, "utf-8");
                 applicationBuilder.queryString(queryString);
@@ -346,7 +345,6 @@ public class Loader {
         applicationService.save(applicationBuilder.build());
         return true;
     }
-
     private boolean loadVertex(String name) {
         final File infoFile = new File(Paths.get(DATA_PATH, name, "info.json").toString());
         String appId;
