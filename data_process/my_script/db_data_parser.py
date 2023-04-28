@@ -74,22 +74,22 @@ def process_dir(application_path):
         return
 
     try:
-        # dag = parse_dag(read_lines(plan_path))
-        # json_str = json.dumps(dag, cls=MyJsonEncoder, indent=None)
+        dag = parse_dag(read_lines(plan_path))
+        json_str = json.dumps(dag, cls=MyJsonEncoder, indent=None)
 
-        # # reformat
-        # json_obj = json.loads(json_str)
-        # for v in json_obj['vertexes']:
-        #     v['name'] = v['vdat']['vertex_name']
-        #     del v['vdat']
-        # for e in json_obj['edges']:
-        #     e['type'] = e['edat']['edge_type']
-        #     del e['edat']
-        # del json_obj['vertex_number']
-        # del json_obj['edge_number']
-        # json_str = json.dumps(json_obj, indent=None, separators=(',', ':'))
+        # reformat
+        json_obj = json.loads(json_str)
+        for v in json_obj['vertexes']:
+            v['name'] = v['vdat']['vertex_name']
+            del v['vdat']
+        for e in json_obj['edges']:
+            e['type'] = e['edat']['edge_type']
+            del e['edat']
+        del json_obj['vertex_number']
+        del json_obj['edge_number']
+        json_str = json.dumps(json_obj, indent=None, separators=(',', ':'))
 
-        json_str = parse_dag_simple(plan_path)
+        # json_str = parse_dag_simple(plan_path)
 
         write_lines(dag_json_path, [json_str])
 
